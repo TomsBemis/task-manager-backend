@@ -2,7 +2,8 @@ import express from "express";
 import dotenv from 'dotenv';
 import cors from "cors";
 import { dbConnect } from "./configs/db.config";
-import TaskRouter from "./routers/task.router";
+import taskRouter from "./routers/task.router";
+import taskTypeStatusRouter from "./routers/task-types-statuses.router";
 
 dotenv.config();
 dbConnect();
@@ -12,7 +13,9 @@ app.use(cors({
     credentials: true,
     origin:["http://localhost:4200"]
 }));
-app.use("/api/tasks", TaskRouter);
+
+app.use("/api", taskRouter);
+app.use("/api", taskTypeStatusRouter);
 
 const port = 5000;
 app.listen(port, () => {

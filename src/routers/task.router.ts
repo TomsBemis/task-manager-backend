@@ -3,9 +3,9 @@ import { initialTasks, initialTaskTypes, initialTaskStatuses } from "../initialT
 import { Task, TaskModel } from '../models/task.model';
 import { TaskTypeModel, TaskStatusModel, Option } from '../models/option.model';
 
-const router = Router();
+const taskRouter = Router();
 
-router.get("/initialize", async (request, response) => {
+taskRouter.get("/tasks/initialize", async (request, response) => {
 
     // Initialize task types
     if(!await TaskTypeModel.countDocuments()) await TaskTypeModel.create(initialTaskTypes);
@@ -45,9 +45,9 @@ router.get("/initialize", async (request, response) => {
     response.send("Database is intialized")
 });
 
-router.get("/", async (request, response) => {
+taskRouter.get("/tasks", async (request, response) => {
     const tasks = await TaskModel.find();
     response.send(tasks);
 });
 
-export default router;
+export default taskRouter;
