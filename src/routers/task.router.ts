@@ -18,22 +18,17 @@ taskRouter.get("/tasks/initialize", async (request, response) => {
     if(!await TaskModel.countDocuments()) {
 
         let tasks : Task[] = [];
-        let taskType : Option | undefined;
-        let taskStatus : Option | undefined;
+        
         initialTasks.forEach(initialTask => {
-            taskType = taskTypes.find( taskType => 
-                taskType.value == initialTask.type
-            );
-            taskStatus = taskStatuses.find( taskStatus => 
-                taskStatus.value == initialTask.status
-            );
-            if(!taskType || !taskStatus) throw Error("");
-
             tasks.push({
                 title: initialTask.title,
                 description: initialTask.description,
-                type: taskType,
-                status: taskStatus
+                type: taskTypes.find( taskType => 
+                    taskType.value == initialTask.type
+                ) as Option,
+                status: taskStatuses.find( taskStatus => 
+                    taskStatus.value == initialTask.status
+                ) as Option,
             });
         });
         await TaskModel.create(tasks);
@@ -47,6 +42,11 @@ taskRouter.get("/tasks", async (request, response) => {
     const tasks = await TaskModel.find();    
     response.send(tasks.map(task => toBasicTask(task)));
 
+});
+
+taskRouter.get("/tasks/:taskId", async (request, response) => {
+    const tasks = await TaskModel.findOne({ _id: request.params.taskId });
+    response.send(tasks);
 });
 
 export default taskRouter;
