@@ -1,7 +1,6 @@
 import {Schema, model} from 'mongoose';
 
 export interface Task {
-    id: number,
     title: string, 
     description: string, 
     type: {
@@ -11,9 +10,7 @@ export interface Task {
     status: {
         value: string,
         displayName: string
-    },
-    createdOn: Date, 
-    modifiedOn: Date
+    }
 }
 
 export const TaskSchema = new Schema<Task>(
@@ -27,9 +24,7 @@ export const TaskSchema = new Schema<Task>(
         status: {
             value: {type: String, required: true},
             displayName: {type: String, required: true}
-        },
-        createdOn: {type: Date, required: true},
-        modifiedOn: {type: Date, required: true},
+        }
     },
     {
         toJSON: {
@@ -43,3 +38,14 @@ export const TaskSchema = new Schema<Task>(
 );
 
 export const TaskModel = model<Task>('tasks', TaskSchema);
+
+export function toBasicTask(task : any) {
+    return {
+        id: task.id,
+        title: task.title, 
+        type: {
+            value: task.type.value,
+            displayName: task.type.displayName
+        }
+    }
+}
