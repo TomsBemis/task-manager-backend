@@ -1,9 +1,11 @@
-import { Router } from 'express';
+import { json, Router } from 'express';
 import { initialTasks, initialTaskTypes, initialTaskStatuses } from "../initialTaskData";
 import { Task, TaskModel, toBasicTask } from '../models/task.model';
 import { TaskTypeModel, TaskStatusModel, Option } from '../models/option.model';
 
 const taskRouter = Router();
+
+taskRouter.use(json());
 
 taskRouter.get("/tasks/initialize", async (request, response) => {
 
@@ -46,6 +48,11 @@ taskRouter.get("/tasks", async (request, response) => {
 
 taskRouter.get("/tasks/:taskId", async (request, response) => {
     const task = await TaskModel.findOne({ _id: request.params.taskId });
+    response.send(task);
+});
+
+taskRouter.post("/tasks", async (request, response) => {
+    const task = await TaskModel.create(request.body);
     response.send(task);
 });
 
