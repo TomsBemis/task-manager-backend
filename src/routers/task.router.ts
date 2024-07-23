@@ -45,8 +45,8 @@ taskRouter.get("/tasks", async (request, response) => {
 });
 
 taskRouter.get("/tasks/:taskId", async (request, response) => {
-    const tasks = await TaskModel.findOne({ _id: request.params.taskId });
-    response.send(tasks);
+    const task = await TaskModel.findOne({ _id: request.params.taskId });
+    response.send(task);
 });
 
 export default taskRouter;
