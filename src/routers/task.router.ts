@@ -52,6 +52,13 @@ taskRouter.get("/tasks/:taskId", async (request, response) => {
 });
 
 taskRouter.post("/tasks", async (request, response) => {
+    // Validate that new task title is unique
+    const taskTitles = (await TaskModel.find()).map(task => task.title);
+    const requestBodyTaskTitle = request.body.title;
+    if (taskTitles.includes(requestBodyTaskTitle)) {
+        response.status(400).send({error: "Task title must be unique"});
+        return;
+    }
     const task = await TaskModel.create(request.body);
     response.send(task);
 });
