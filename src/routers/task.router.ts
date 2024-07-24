@@ -68,4 +68,29 @@ taskRouter.delete("/tasks/:taskId", async (request, response) => {
     response.send();
 });
 
+taskRouter.patch("/tasks/:taskId", async (request, response) => {
+    
+    const requestTaskId = request.params.taskId;
+
+    // Validate that new task title is unique
+    const taskTitles = (await TaskModel.find())
+        .filter(task => task.id == requestTaskId)
+        .map(task => task.title);
+    const requestBodyTaskTitle = request.body.title;
+    if (taskTitles.includes(requestBodyTaskTitle)) {
+        response.status(400).send({error: "Task title must be unique"});
+        return;
+    }
+
+    // Update by id
+    await TaskModel.updateOne(
+        { _id: requestTaskId },
+        { $set: request.body }
+    );
+
+    // Fetch updated task
+    const task = await TaskModel.findOne({ _id: requestTaskId });
+    response.send(task);
+});
+
 export default taskRouter;
