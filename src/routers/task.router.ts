@@ -63,4 +63,10 @@ taskRouter.post("/tasks", async (request, response) => {
     response.send(task);
 });
 
+taskRouter.delete("/tasks/:taskId", async (request, response) => {
+    await TaskModel.deleteOne({ _id: request.params.taskId });
+    const newTasks = await TaskModel.find();
+    response.send(newTasks);
+});
+
 export default taskRouter;
