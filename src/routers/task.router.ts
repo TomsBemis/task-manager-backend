@@ -1,9 +1,11 @@
-import { Router } from 'express';
+import { json, Router } from 'express';
 import { initialTasks, initialTaskTypes, initialTaskStatuses } from "../initialTaskData";
 import { Task, TaskModel, toBasicTask } from '../models/task.model';
 import { TaskTypeModel, TaskStatusModel, Option } from '../models/option.model';
 
 const taskRouter = Router();
+
+taskRouter.use(json());
 
 taskRouter.get("/tasks/initialize", async (request, response) => {
 
@@ -18,22 +20,17 @@ taskRouter.get("/tasks/initialize", async (request, response) => {
     if(!await TaskModel.countDocuments()) {
 
         let tasks : Task[] = [];
-        let taskType : Option | undefined;
-        let taskStatus : Option | undefined;
+        
         initialTasks.forEach(initialTask => {
-            taskType = taskTypes.find( taskType => 
-                taskType.value == initialTask.type
-            );
-            taskStatus = taskStatuses.find( taskStatus => 
-                taskStatus.value == initialTask.status
-            );
-            if(!taskType || !taskStatus) throw Error("");
-
             tasks.push({
                 title: initialTask.title,
                 description: initialTask.description,
-                type: taskType,
-                status: taskStatus
+                type: taskTypes.find( taskType => 
+                    taskType.value == initialTask.type
+                ) as Option,
+                status: taskStatuses.find( taskStatus => 
+                    taskStatus.value == initialTask.status
+                ) as Option,
             });
         });
         await TaskModel.create(tasks);
@@ -47,6 +44,23 @@ taskRouter.get("/tasks", async (request, response) => {
     const tasks = await TaskModel.find();    
     response.send(tasks.map(task => toBasicTask(task)));
 
+});
+
+taskRouter.get("/tasks/:taskId", async (request, response) => {
+    const task = await TaskModel.findOne({ _id: request.params.taskId });
+    response.send(task);
+});
+
+taskRouter.post("/tasks", async (request, response) => {
+    // Validate that new task title is unique
+    const taskTitles = (await TaskModel.find()).map(task => task.title);
+    const requestBodyTaskTitle = request.body.title;
+    if (taskTitles.includes(requestBodyTaskTitle)) {
+        response.status(400).send({error: "Task title must be unique"});
+        return;
+    }
+    const task = await TaskModel.create(request.body);
+    response.send(task);
 });
 
 export default taskRouter;
