@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { initialTasks, initialTaskTypes, initialTaskStatuses } from "../initialTaskData";
-import { Task, TaskModel } from '../models/task.model';
+import { Task, TaskModel, toBasicTask } from '../models/task.model';
 import { TaskTypeModel, TaskStatusModel, Option } from '../models/option.model';
 
 const taskRouter = Router();
@@ -30,13 +30,10 @@ taskRouter.get("/tasks/initialize", async (request, response) => {
             if(!taskType || !taskStatus) throw Error("");
 
             tasks.push({
-                id: 0,
                 title: initialTask.title,
                 description: initialTask.description,
                 type: taskType,
-                status: taskStatus,
-                createdOn: new Date(initialTask.createdOn),
-                modifiedOn: new Date(initialTask.modifiedOn)
+                status: taskStatus
             });
         });
         await TaskModel.create(tasks);
@@ -46,8 +43,10 @@ taskRouter.get("/tasks/initialize", async (request, response) => {
 });
 
 taskRouter.get("/tasks", async (request, response) => {
-    const tasks = await TaskModel.find();
-    response.send(tasks);
+
+    const tasks = await TaskModel.find();    
+    response.send(tasks.map(task => toBasicTask(task)));
+
 });
 
 export default taskRouter;
