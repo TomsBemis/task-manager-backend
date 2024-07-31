@@ -39,6 +39,19 @@ taskRouter.get("/tasks/initialize", async (request, response) => {
     response.send("Database is intialized")
 });
 
+taskRouter.get("/essential-task-data", async (request, response) => {
+
+    const taskStatuses = await TaskStatusModel.find();  
+    const taskTypes = await TaskTypeModel.find();  
+    const tasks = await TaskModel.find();    
+    response.send({
+        'taskStatuses' : taskStatuses,
+        'taskTypes' : taskTypes,
+        'tasks' : tasks.map(task => toBasicTask(task))
+    });
+
+});
+
 taskRouter.get("/tasks", async (request, response) => {
 
     const tasks = await TaskModel.find();    
@@ -66,6 +79,21 @@ taskRouter.post("/tasks", async (request, response) => {
 taskRouter.delete("/tasks/:taskId", async (request, response) => {
     await TaskModel.deleteOne({ _id: request.params.taskId });
     response.send();
+});
+
+taskRouter.patch("/tasks/:taskId", async (request, response) => {
+    // Validate that new task title is unique except for task in request
+    const taskTitles = await TaskModel.find({$nor: [ {_id: request.params.taskId}]});
+    if (taskTitles.map(task => task.title).includes(request.body.title)) {
+        response.status(400).send({error: "Task title must be unique"});
+        return;
+    }
+    const task = await TaskModel.findOneAndUpdate(
+        { _id: request.params.taskId },
+        { $set: request.body },
+        { new: true }
+    );
+    response.send(task);
 });
 
 export default taskRouter;
