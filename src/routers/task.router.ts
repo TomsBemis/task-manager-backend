@@ -127,25 +127,4 @@ taskRouter.patch("/tasks/:taskId", async (request, response) => {
     response.send(task);
 });
 
-taskRouter.post("/login", async (request, response) => {
-    const users = await UserModel.find();
-    users.every(user => {
-        if ( user.username === request.body.username ) {
-            if ( user.password === request.body.password ) {
-                response.status(200);
-                response.send(user);
-                return;
-            }
-            else {
-                response.status(400);
-                response.send("Invalid password");
-            }
-        }
-        else {
-            response.status(400);
-            response.send("Invalid username");
-        }
-    })
-});
-
 export default taskRouter;

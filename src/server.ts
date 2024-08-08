@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from "cors";
 import { dbConnect } from "./configs/db.config";
 import taskRouter from "./routers/task.router";
+import authRouter from "./routers/auth.router";
 
 dotenv.config();
 dbConnect();
@@ -14,6 +15,7 @@ app.use(cors({
 }));
 
 app.use("/api", taskRouter);
+app.use("/api", authRouter);
 
 const port = 5000;
 app.listen(port, () => {

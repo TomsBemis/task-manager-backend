@@ -19,5 +19,5 @@ export const initialTaskStatuses = [
 ];
 
 export const initialUsers = [
-    {"username" : "test-user", "password" : "1234"},
+    {"username" : "test-user", "password" : "1234", "firstName" : "Test", "lastName" : "User"},
 ];
