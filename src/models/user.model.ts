@@ -1,6 +1,7 @@
 import {Schema, model} from 'mongoose';
 
 export interface User {
+    id: string,
     username: string,
     password: string,
     firstName: string,
@@ -11,6 +12,7 @@ export interface User {
 
 export const UserSchema = new Schema<User>(
     {
+        id: {type: String, required: true},
         username: {type: String, required: true},
         password: {type: String, required: true},
         firstName: {type: String, required: true},
@@ -30,3 +32,9 @@ export const UserSchema = new Schema<User>(
 );
 
 export const UserModel = model<User>('users', UserSchema);
+
+export interface AuthResponse {
+    accessToken: string,
+    refreshToken: string,
+    user: User,
+}

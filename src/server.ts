@@ -14,10 +14,16 @@ app.use(cors({
     origin:["http://localhost:4200"]
 }));
 
-app.use("/api", taskRouter);
-app.use("/api", authRouter);
+app.use("/api/tasks", taskRouter);
+app.use("/api/auth", authRouter);
 
 const port = 5000;
 app.listen(port, () => {
     console.log('Server started on http://localhost:'+port);
 });
+
+export class InternalError extends Error {
+    constructor(message: string) {
+      super(message);
+    }
+}
