@@ -1,12 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-import { AuthResponse, User, UserModel } from "./models/user.model";
-import { InternalError } from "./server";
+import { Request } from "express";
+import { AuthCredentials, LoginResponse, User, UserData, UserModel } from "./models/user.model";
     
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 export class AuthService {
 
-    async authenticateUser(userId : string) : Promise<AuthResponse> {
+    async authenticateUser(userId : string) : Promise<AuthCredentials> {
         
         if(process.env.AUTH_TOKEN_SECRET && process.env.AUTH_TOKEN_TIMESPAN) {
             const tokenTimespan = +(process.env.AUTH_TOKEN_TIMESPAN ?? 0) * 1000;
@@ -14,32 +14,38 @@ export class AuthService {
             const generatedRefreshToken = this.getAuthToken(userId, null);
 
             // Set token and expiration date
-            const authenticatedUser = (await UserModel.find())
-            .filter(user => user.id == userId)
-            .map(user => {
-                user.token = generatedAccessToken;
-                user.tokenExpirationDate = new Date(Date.now() + tokenTimespan);
-                return user;
-            })[0];
+            // const authenticatedUser = (await UserModel.find())
+            // .filter(user => user.id == userId)
+            // .map(user => {
+            //     user.token = generatedAccessToken;
+            //     user.tokenExpirationDate = new Date(Date.now() + tokenTimespan);
+            //     return user;
+            // })[0];
 
             // Update user token and expiration date in DB
             await UserModel.findOneAndUpdate(
                 { _id: userId },
-                { $set: authenticatedUser },
+                { $set: {
+                    accessToken: generatedAccessToken,
+                    refreshToken: generatedRefreshToken
+                }},
                 { new: true }
             );
 
             return {
                 accessToken : generatedAccessToken,
                 refreshToken : generatedRefreshToken,
-                user : authenticatedUser,
+                userId : userId,
             };
         }
         else {
-            console.log("Authentication token settings not configured");
-            throw new Error();
+            throw new Error("Authentication token settings not configured");
         }
         
+    }
+
+    public async getUserById(userId: string): Promise<UserData | null> {
+        return await UserModel.findById(userId);
     }
 
     public async removeUserToken(userId: string): Promise<void> {
@@ -53,11 +59,12 @@ export class AuthService {
     }
 
     async isUserValid(request: Request): Promise<User | null> {
-        const user = await UserModel.findOne({ 
-            username: request.body.username, 
-            password: request.body.password
-        });
-        return user;
+        const fetchedUser = await UserModel.findOne({ username: request.body.username });
+
+        const valid =  await bcrypt.compare(request.body.password, fetchedUser?.password);
+
+        if(valid) return fetchedUser;
+        else throw Error("Invalid user password");
     }
 
     private getAuthToken(userId : string, tokenTimespan : number | null) {

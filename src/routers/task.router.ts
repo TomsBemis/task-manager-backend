@@ -3,15 +3,10 @@ import { initialTasks, initialTaskTypes, initialTaskStatuses, initialUsers } fro
 import { Task, TaskModel, toBasicTask } from '../models/task.model';
 import { TaskTypeModel, TaskStatusModel, Option } from '../models/option.model';
 import { UserModel } from '../models/user.model';
-import { AuthService } from '../auth.service';
 
 const taskRouter = Router();
 
-const authService = new AuthService();
-
 taskRouter.use(json());
-
-// taskRouter.use(authService.verifyToken);
 
 taskRouter.get("/initialize", async (request, response) => {
 

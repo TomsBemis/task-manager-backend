@@ -1,24 +1,24 @@
 import {Schema, model} from 'mongoose';
 
 export interface User {
-    id: string,
+    _id: string,
     username: string,
     password: string,
     firstName: string,
     lastName: string,
-    token: string,
-    tokenExpirationDate: Date
+    accessToken: string,
+    refreshToken: string
 }
 
 export const UserSchema = new Schema<User>(
     {
-        id: {type: String, required: true},
+        _id: {type: String, required: true},
         username: {type: String, required: true},
         password: {type: String, required: true},
         firstName: {type: String, required: true},
         lastName: {type: String, required: true},
-        token: {type: String},
-        tokenExpirationDate: {type: Date},
+        accessToken: {type: String},
+        refreshToken: {type: String},
     },
     {
         toJSON: {
@@ -33,8 +33,19 @@ export const UserSchema = new Schema<User>(
 
 export const UserModel = model<User>('users', UserSchema);
 
-export interface AuthResponse {
+export interface UserData {
+    id: string,
+    firstName: string,
+    lastName: string,
+}
+
+export interface LoginResponse {
+    authentication: AuthCredentials
+    user: User,
+}
+
+export interface AuthCredentials {
     accessToken: string,
     refreshToken: string,
-    user: User,
+    userId: string,
 }
