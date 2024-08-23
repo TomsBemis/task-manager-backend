@@ -13,15 +13,6 @@ export class AuthService {
             const generatedAccessToken = this.getAuthToken(userId, tokenTimespan);
             const generatedRefreshToken = this.getAuthToken(userId, null);
 
-            // Set token and expiration date
-            // const authenticatedUser = (await UserModel.find())
-            // .filter(user => user.id == userId)
-            // .map(user => {
-            //     user.token = generatedAccessToken;
-            //     user.tokenExpirationDate = new Date(Date.now() + tokenTimespan);
-            //     return user;
-            // })[0];
-
             // Update user token and expiration date in DB
             await UserModel.findOneAndUpdate(
                 { _id: userId },
