@@ -1,12 +1,44 @@
-import { json, Request, Response, Router } from 'express';
-import { AuthCredentials, User, UserData } from '../models/user.model';
+import { json, Router } from 'express';
+import { AuthCredentials, Role, RoleModel, User, UserModel } from '../models/user.model';
 import { AuthService } from '../auth.service';
 import { InternalError } from '../server';
+import { initialRoles, initialUsers } from '../initialUserData';
 
 const authRouter = Router();
 const authService = new AuthService();
 
 authRouter.use(json());
+
+authRouter.get("/initialize", async (request, response) => {
+
+    // Initialize roles
+    if(!await RoleModel.countDocuments()) await RoleModel.create(initialRoles);
+    let roles = await RoleModel.find();
+
+    // Initialize users
+    if(!await UserModel.countDocuments()) {
+
+        let users : User[] = [];
+        
+        initialUsers.forEach(initialUser => {
+
+            users.push({
+                _id: initialUser._id,
+                username: initialUser.username,
+                password: initialUser.password,
+                firstName: initialUser.firstName,
+                lastName: initialUser.lastName,
+                accessToken: null,
+                refreshToken: null,
+                role: initialUser.role,
+            });
+        });
+    }
+
+    if(!await UserModel.countDocuments()) await UserModel.create(initialUsers);
+
+    response.send("Database is intialized");
+});
 
 authRouter.post("/login", async (request, response) => {
 

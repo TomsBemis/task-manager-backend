@@ -1,5 +1,5 @@
 import { json, Router } from 'express';
-import { initialTasks, initialTaskTypes, initialTaskStatuses, initialUsers } from "../initialTaskData";
+import { initialTasks, initialTaskTypes, initialTaskStatuses } from "../initialTaskData";
 import { Task, TaskModel, toBasicTask } from '../models/task.model';
 import { TaskTypeModel, TaskStatusModel, Option } from '../models/option.model';
 import { UserModel } from '../models/user.model';
@@ -36,10 +36,6 @@ taskRouter.get("/initialize", async (request, response) => {
         });
         await TaskModel.create(tasks);
     };
-
-    // Initialize users
-    if(!await UserModel.countDocuments()) await UserModel.create(initialUsers);
-    let users = await UserModel.find();
 
     response.send("Database is intialized")
 });
