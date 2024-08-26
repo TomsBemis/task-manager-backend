@@ -1,11 +1,13 @@
 import { json, Router } from 'express';
-import { AuthCredentials, Role, RoleModel, User, UserModel } from '../models/user.model';
+import { AuthCredentials, User, UserModel } from '../models/user.model';
 import { AuthService } from '../auth.service';
 import { InternalError } from '../server';
 import { initialRoles, initialUsers } from '../initialUserData';
+import { RoleModel } from '../models/option.model';
 
 const authRouter = Router();
 const authService = new AuthService();
+const bcrypt = require('bcrypt');
 
 authRouter.use(json());
 
@@ -18,26 +20,41 @@ authRouter.get("/initialize", async (request, response) => {
     // Initialize users
     if(!await UserModel.countDocuments()) {
 
-        let users : User[] = [];
+        let userData : User[] = [];
+
+        if(process.env.SALT_ROUNDS) {
+
+            // Generate salt
+            bcrypt.genSalt(+process.env.SALT_ROUNDS, async (error: Error, salt: string) => {
+
+                if (error) throw new Error("Error while generating salt: "+error.message);
+                
+                initialUsers.forEach(async initialUser => {
+                    
+                    // Hash password
+                    await bcrypt.hash(initialUser.password, salt, async (error: Error, hash: string) => {
+
+                        if (error) throw new Error("Error while hashing password: "+error.message);
         
-        initialUsers.forEach(initialUser => {
-
-            users.push({
-                _id: initialUser._id,
-                username: initialUser.username,
-                password: initialUser.password,
-                firstName: initialUser.firstName,
-                lastName: initialUser.lastName,
-                accessToken: null,
-                refreshToken: null,
-                role: initialUser.role,
+                        await UserModel.collection.insertOne({
+                            username: initialUser.username,
+                            password: hash,
+                            firstName: initialUser.firstName,
+                            lastName: initialUser.lastName,
+                            accessToken: null,
+                            refreshToken: null,
+                            role: initialUser.role,
+                        });
+                    });
+                });
             });
-        });
-    }
+        }
+        else throw new Error("Authentication settings not configured");
 
-    if(!await UserModel.countDocuments()) await UserModel.create(initialUsers);
+    } 
 
     response.send("Database is intialized");
+    
 });
 
 authRouter.post("/login", async (request, response) => {

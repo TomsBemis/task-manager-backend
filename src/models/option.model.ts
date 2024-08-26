@@ -14,3 +14,4 @@ export const OptionSchema = new Schema<Option>(
 
 export const TaskTypeModel = model<Option>('task-types', OptionSchema);
 export const TaskStatusModel = model<Option>('task-statuses', OptionSchema);
+export const RoleModel = model<Option>('roles', OptionSchema);
