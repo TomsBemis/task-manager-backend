@@ -2,7 +2,6 @@ import { json, Router } from 'express';
 import { initialTasks, initialTaskTypes, initialTaskStatuses } from "../initialTaskData";
 import { Task, TaskModel, toBasicTask } from '../models/task.model';
 import { TaskTypeModel, TaskStatusModel, Option } from '../models/option.model';
-import { UserModel } from '../models/user.model';
 
 const taskRouter = Router();
 

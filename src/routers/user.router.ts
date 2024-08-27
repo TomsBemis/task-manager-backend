@@ -1,20 +1,57 @@
 import { json, Router } from 'express';
-import { UserModel } from '../models/user.model';
+import { UserService } from '../user.service';
+import { UserData } from '../models/user.model';
 
 const userRouter = Router();
+const userService = new UserService();
 
 userRouter.use(json());
 
+userRouter.get("/initialize", async (request, response) => {
+
+    try {
+        userService.initializeUsers();
+        response.send("Database is intialized");
+    }
+    catch (error) {
+        console.log(error);
+        response.status(500);
+        response.send(error);
+    }
+});
+
 userRouter.get("/", async (request, response) => {
-
-    const users = await UserModel.find();    
-    response.send(users);
-
+    try {
+        response.send({
+            users: await userService.getUsers()
+        });
+    }
+    catch (error) {
+        console.log(error);
+        response.status(500);
+        response.send(error);
+    }
 });
 
 userRouter.get("/:userId", async (request, response) => {
-    const user = await UserModel.findOne({ _id: request.params.userId });
-    response.send(user);
+    try {
+
+        let userById: UserData | null = await userService.getUserById(request.params.userId);
+
+        if(!userById) {
+            response.status(404);
+            response.send();
+        }
+
+        response.send({
+            user: userById
+        });
+    }
+    catch (error) {
+        console.log(error);
+        response.status(500);
+        response.send(error);
+    }
 });
 
 export default userRouter;

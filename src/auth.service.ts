@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { AuthCredentials, LoginResponse, User, UserData, UserModel } from "./models/user.model";
+import { AuthCredentials, User, UserModel } from "./models/user.model";
     
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -33,10 +33,6 @@ export class AuthService {
             throw new Error("Authentication token settings not configured");
         }
         
-    }
-
-    public async getUserById(userId: string): Promise<UserData | null> {
-        return await UserModel.findById(userId);
     }
 
     public async removeUserToken(userId: string): Promise<void> {

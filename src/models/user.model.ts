@@ -1,9 +1,9 @@
 import {Schema, model} from 'mongoose';
+import { Option } from './option.model';
 
 // User model
 
 export interface User {
-    _id: string,
     username: string,
     password: string,
     firstName: string,
@@ -15,7 +15,6 @@ export interface User {
 
 export const UserSchema = new Schema<User>(
     {
-        _id: {type: String, required: true},
         username: {type: String, required: true},
         password: {type: String, required: true},
         firstName: {type: String, required: true},
@@ -40,9 +39,9 @@ export const UserModel = model<User>('users', UserSchema);
 // Other interfaces
 
 export interface UserData {
-    id: string,
     firstName: string,
     lastName: string,
+    role: Option
 }
 
 export interface LoginResponse {
