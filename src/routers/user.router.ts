@@ -1,11 +1,13 @@
 import { json, Router } from 'express';
 import { UserService } from '../user.service';
 import { UserData } from '../models/user.model';
+import { authenticatedUser } from '../guards/auth.guard';
 
 const userRouter = Router();
 const userService = new UserService();
 
 userRouter.use(json());
+userRouter.use(authenticatedUser);
 
 userRouter.get("/initialize", async (request, response) => {
 

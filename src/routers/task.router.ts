@@ -2,10 +2,12 @@ import { json, Router } from 'express';
 import { initialTasks, initialTaskTypes, initialTaskStatuses } from "../initialTaskData";
 import { Task, TaskModel, toBasicTask } from '../models/task.model';
 import { TaskTypeModel, TaskStatusModel, Option } from '../models/option.model';
+import { authenticatedUser } from '../guards/auth.guard';
 
 const taskRouter = Router();
 
 taskRouter.use(json());
+taskRouter.use(authenticatedUser);
 
 taskRouter.get("/initialize", async (request, response) => {
 

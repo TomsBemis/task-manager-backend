@@ -2,11 +2,13 @@ import { json, Router } from 'express';
 import { AuthCredentials } from '../models/user.model';
 import { AuthService } from '../auth.service';
 import { InternalError } from '../server';
+import { authenticatedUser } from '../guards/auth.guard';
 
 const authRouter = Router();
 const authService = new AuthService();
 
 authRouter.use(json());
+authRouter.use("/logout", authenticatedUser);
 
 authRouter.post("/login", async (request, response) => {
 

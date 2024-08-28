@@ -35,6 +35,19 @@ export class AuthService {
         
     }
 
+    // Compare JWT access token by taking user id in JWT content and checking if user data matches
+    public async isAccessTokenValid(accessToken: string): Promise<boolean> {
+        return jwt.verify(accessToken, process.env.AUTH_TOKEN_SECRET as string, async (error: Error, tokenContent: any) => {
+
+            if (error) throw Error("Invalid JSON web token: " + error.message);
+            const fetchedUser: User | null = await UserModel.findById(tokenContent.userId);
+            if (!fetchedUser) throw Error("Invalid JSON web token: could not find user by ID provided in token");
+            if (accessToken !== fetchedUser.accessToken) throw Error("Invalid JSON web token: specified user has different access token");
+
+            return true;    // All conditions for valid access token are met
+        });
+    }
+
     public async removeUserToken(userId: string): Promise<void> {
         
         // Update user token and expiration date in DB
@@ -57,32 +70,5 @@ export class AuthService {
     private getAuthToken(userId : string, tokenTimespan : number | null) {
         if (!tokenTimespan) return jwt.sign({userId: userId}, process.env.AUTH_TOKEN_SECRET);
         return jwt.sign({userId: userId}, process.env.AUTH_TOKEN_SECRET, { expiresIn: tokenTimespan });
-    }
-
-    public verifyToken(request : Request) : { valid: boolean, message : string} {
-        const token = request.headers['authorization'];
-
-        if (!token) {
-            return {
-                valid : false,
-                message : "Missing JWT in 'authorization' header."
-            };
-        }
-
-        jwt.verify(token, process.env.AUTH_TOKEN_SECRET as string, (error: Error, user: any) => {
-            
-
-            if (error) {
-                return {
-                    valid : false,
-                    message : error.message
-                };
-            }
-        });
-
-        return {
-            valid : true,
-            message : "JWT is valid."
-        }
     }
 }
