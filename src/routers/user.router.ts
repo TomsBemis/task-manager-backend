@@ -7,7 +7,8 @@ const userRouter = Router();
 const userService = new UserService();
 
 userRouter.use(json());
-userRouter.use(authenticatedUser);
+userRouter.use("/", authenticatedUser);
+userRouter.use("/:userId", authenticatedUser);
 
 userRouter.get("/initialize", async (request, response) => {
 
