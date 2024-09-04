@@ -36,7 +36,7 @@ export class AuthService {
     }
 
     // Compare JWT access token by taking user id in JWT content and checking if user data matches
-    public async isAccessTokenValid(accessToken: string): Promise<User | null> {
+    public async isAccessTokenValid(accessToken: string): Promise<{ userId: string, user: User} | null> {
         return jwt.verify(accessToken, process.env.AUTH_TOKEN_SECRET as string, async (error: Error, tokenContent: any) => {
 
             if (error) throw Error("Invalid JSON web token: " + error.message);
@@ -44,7 +44,10 @@ export class AuthService {
             if (!fetchedUser) throw Error("Invalid JSON web token: could not find user by ID provided in token");
             if (accessToken !== fetchedUser.accessToken) throw Error("Invalid JSON web token: specified user has different access token");
 
-            return fetchedUser;    // All conditions for valid access token are met
+            return {
+                userId: tokenContent.userId,
+                user: fetchedUser
+            };    // All conditions for valid access token are met
         });
     }
 

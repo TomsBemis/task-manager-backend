@@ -1,6 +1,6 @@
 import { json, Router } from 'express';
 import { UserService } from '../services/user.service';
-import { UserData } from '../models/user.model';
+import { AuthenticatedUser, User, UserData } from '../models/user.model';
 import { authenticatedUser } from '../guards/auth.guard';
 import { userRoleGuard } from '../guards/user-role.guard';
 import { initialRoles } from '../initialUserData';
@@ -40,6 +40,21 @@ userRouter.get("/", async (request, response) => {
 });
 
 userRouter.get("/:userId", async (request, response) => {
+    const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
+
+    if(authenticatedUser.user.role !== "ADMIN") {
+        if(request.params.userId !== authenticatedUser.userId) {
+            response.status(401);
+            response.json({ error: "Only users with administrator priviledges or users owners have access." });
+            return;
+        }
+    }
+
+    if(!authenticatedUser) {
+        response.status(401);
+        response.json({ error: "Internal Server Error" });
+        return;
+    }
     try {
 
         let userById: UserData | null = await userService.getUserById(request.params.userId);

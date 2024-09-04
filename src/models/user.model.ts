@@ -44,13 +44,13 @@ export interface UserData {
     role: Option
 }
 
-export interface LoginResponse {
-    authentication: AuthCredentials
-    user: User,
-}
-
 export interface AuthCredentials {
     accessToken: string,
     refreshToken: string,
     userId: string,
+}
+
+export interface AuthenticatedUser {
+    userId: string,
+    user: User
 }
