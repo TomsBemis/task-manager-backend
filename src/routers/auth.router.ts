@@ -1,6 +1,6 @@
 import { json, Router } from 'express';
 import { AuthCredentials } from '../models/user.model';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../services/auth.service';
 import { InternalError } from '../server';
 import { authenticatedUser } from '../guards/auth.guard';
 

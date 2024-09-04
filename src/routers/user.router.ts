@@ -1,19 +1,22 @@
 import { json, Router } from 'express';
-import { UserService } from '../user.service';
+import { UserService } from '../services/user.service';
 import { UserData } from '../models/user.model';
 import { authenticatedUser } from '../guards/auth.guard';
+import { userRoleGuard } from '../guards/user-role.guard';
+import { initialRoles } from '../initialUserData';
 
 const userRouter = Router();
 const userService = new UserService();
 
 userRouter.use(json());
-userRouter.use("/", authenticatedUser);
+userRouter.use("initialize", authenticatedUser, userRoleGuard([initialRoles['admin']], true));
+userRouter.use("/", authenticatedUser, userRoleGuard([initialRoles['admin']], true));
 userRouter.use("/:userId", authenticatedUser);
 
 userRouter.get("/initialize", async (request, response) => {
 
     try {
-        userService.initializeUsers();
+        UserService.initializeUsers();
         response.send("Database is intialized");
     }
     catch (error) {
@@ -25,7 +28,7 @@ userRouter.get("/initialize", async (request, response) => {
 
 userRouter.get("/", async (request, response) => {
     try {
-        response.send({
+        response.json({
             users: await userService.getUsers()
         });
     }

@@ -1,6 +1,6 @@
-import { initialRoles, initialUsers } from "./initialUserData";
-import { Option, RoleModel } from "./models/option.model";
-import { User, UserData, UserModel } from "./models/user.model";
+import { initialRoles, initialUsers } from "../initialUserData";
+import { Option, RoleModel } from "../models/option.model";
+import { User, UserData, UserModel } from "../models/user.model";
 
 const bcrypt = require('bcrypt');
 
@@ -8,15 +8,18 @@ export class UserService {
 
     private roles : Option[] = [];
 
-    public async initializeUsers(): Promise<void> {
+    static async initializeUsers(): Promise<void> {
             
-        // Initialize roles
-        if(!await RoleModel.countDocuments()) await RoleModel.create(initialRoles);
-        let roles = await RoleModel.find();
+        // Delete all roles from DB and initialize roles
+        await RoleModel.deleteMany({}).then(async result => {
+            let roleValues: Option[] = [];
+            for (let key in initialRoles) roleValues.push(initialRoles[key])
+            await RoleModel.create(roleValues);
+            roleValues = await RoleModel.find();
+        })
 
-        // Initialize users
-        if(!await UserModel.countDocuments()) {
-
+        // Delete all users from DB and initialize users
+        await UserModel.deleteMany({}).then(async result => {
             let userData : User[] = [];
 
             if(process.env.SALT_ROUNDS) {
@@ -47,8 +50,7 @@ export class UserService {
                 });
             }
             else throw new Error("Authentication settings not configured");
-
-        }
+        })
     }
 
     public async getUsers(): Promise<UserData[] | null> {
