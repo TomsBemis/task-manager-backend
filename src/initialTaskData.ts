@@ -17,3 +17,7 @@ export const initialTaskStatuses = [
     {"value" : "OBSOLETE", "displayName" : "Obsolete"},
     {"value" : "DONE", "displayName" : "Done"}
 ];
+
+export const initialUsers = [
+    {"username" : "test-user", "password" : "1234", "firstName" : "Test", "lastName" : "User"},
+];
