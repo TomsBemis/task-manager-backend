@@ -56,15 +56,20 @@ export class AuthService {
         // Update user token and expiration date in DB
         await UserModel.findOneAndUpdate(
             { _id: userId },
-            { $set: { token: "" } },
+            { $set: { 
+                accessToken: "",
+                refreshToken: "",
+                }},
             { new: true }
         );
     }
 
-    async isUserValid(request: Request): Promise<User | null> {
-        const fetchedUser = await UserModel.findOne({ username: request.body.username });
+    async isUserValid(inputUsername: string, inputPassword: string): Promise<User | null> {
+        const fetchedUser = await UserModel.findOne({ username: inputUsername });
 
-        const valid =  await bcrypt.compare(request.body.password, fetchedUser?.password);
+        if(!fetchedUser) throw Error("User with username '"+inputUsername+"' not found");
+
+        const valid =  await bcrypt.compare(inputPassword, fetchedUser?.password);
 
         if(valid) return fetchedUser;
         else throw Error("Invalid user password");
