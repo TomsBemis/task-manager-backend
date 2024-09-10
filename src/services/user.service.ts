@@ -1,6 +1,6 @@
 import { initialRoles, initialUsers } from "../initialUserData";
 import { Option, RoleModel } from "../models/option.model";
-import { User, UserData, UserModel } from "../models/user.model";
+import { User, UserData, UserModel, UserRole } from "../models/user.model";
 
 const bcrypt = require('bcrypt');
 
@@ -70,6 +70,27 @@ export class UserService {
 
         if(!user) return null;
         return this.convertToUserData(user);
+    }
+
+    public async updateRoles(userId: string, updatedRoles: UserRole[]): Promise<UserData | null> {
+
+        // Check if user exists by id
+        const userById: any = await UserModel.findOne({ _id: userId });
+        if(!userById) return null;
+
+        // Validate that new roles can be assigned
+        let managerRole: UserRole[] = updatedRoles.filter(updatedRole => {
+            return updatedRole.role.value === "MANAGER";
+        });
+
+        if(managerRole == null) throw Error("Only manager role can be updated");
+
+        await UserModel.updateOne(
+            { _id: userId },
+            { $set: {role: managerRole[0].enabled ? "MANAGER" : "USER"} }
+        )
+
+        return this.convertToUserData(await UserModel.findOne({ _id: userId }));
     }
 
     /* Method to be used to hide user password and retrieve full role data */

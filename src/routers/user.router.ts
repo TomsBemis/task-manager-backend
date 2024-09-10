@@ -75,4 +75,26 @@ userRouter.get("/:userId", async (request, response) => {
     }
 });
 
+userRouter.post("/:userId", async (request, response) => {
+    try {
+
+        let updatedUser: UserData | null = await userService.updateRoles(request.params.userId, request.body.roles);
+
+        if(!updatedUser) {
+            response.status(404);
+            response.send();
+        }
+
+        response.json({
+            user: updatedUser
+        });
+    }
+    catch (error: any) {
+        console.log(error);
+        response.json({
+            error: error.message
+        });
+    }
+});
+
 export default userRouter;

@@ -54,3 +54,8 @@ export interface AuthenticatedUser {
     userId: string,
     user: User
 }
+
+export interface UserRole {
+    role: Option, 
+    enabled: boolean
+}
