@@ -39,6 +39,7 @@ export const UserModel = model<User>('users', UserSchema);
 // Other interfaces
 
 export interface UserData {
+    id: string,
     firstName: string,
     lastName: string,
     role: Option

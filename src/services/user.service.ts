@@ -1,12 +1,10 @@
 import { initialRoles, initialUsers } from "../initialUserData";
 import { Option, RoleModel } from "../models/option.model";
-import { User, UserData, UserModel, UserRole } from "../models/user.model";
+import { UserData, UserModel, UserRole } from "../models/user.model";
 
 const bcrypt = require('bcrypt');
 
 export class UserService {
-
-    private roles : Option[] = [];
 
     static async initializeUsers(): Promise<void> {
             
@@ -19,8 +17,7 @@ export class UserService {
         })
 
         // Delete all users from DB and initialize users
-        await UserModel.deleteMany({}).then(async result => {
-            let userData : User[] = [];
+        await UserModel.deleteMany({}).then(async () => {
 
             if(process.env.SALT_ROUNDS) {
 
@@ -54,22 +51,16 @@ export class UserService {
     }
 
     public async getUsers(): Promise<UserData[] | null> {
-        
-        if(this.roles.length == 0) this.roles = await RoleModel.find();  
-
         return (await UserModel.find()).map(user => {
-            return this.convertToUserData(user);
+            return UserService.convertToUserData(user);
         });
     }
 
     public async getUserById(userId: string): Promise<UserData | null> {
-        
-        if(this.roles.length == 0) this.roles = await RoleModel.find();
-
         const user: any = await UserModel.findOne({ _id: userId });
 
         if(!user) return null;
-        return this.convertToUserData(user);
+        return UserService.convertToUserData(user);
     }
 
     public async updateRoles(userId: string, updatedRoles: UserRole[]): Promise<UserData | null> {
@@ -90,13 +81,13 @@ export class UserService {
             { $set: {role: managerRole[0].enabled ? "MANAGER" : "USER"} }
         )
 
-        return this.convertToUserData(await UserModel.findOne({ _id: userId }));
+        return UserService.convertToUserData(await UserModel.findOne({ _id: userId }));
     }
 
     /* Method to be used to hide user password and retrieve full role data */
-    private convertToUserData(user: any){   // Setting parameter type to User doesn't allow fetching hidden field '_id'
+    public static convertToUserData(user: any){   // Setting parameter type to User doesn't allow fetching hidden field '_id'
 
-        let foundRole = this.roles.find((role: Option) => role.value == user.role);
+        let foundRole = initialRoles[user.role];
         if(!foundRole) throw Error("Role value "+user.role+" not found!");
         return {
             id: user._id,

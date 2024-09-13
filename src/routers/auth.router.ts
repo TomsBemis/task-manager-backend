@@ -1,5 +1,5 @@
 import { json, Router } from 'express';
-import { AuthCredentials, AuthenticatedUser } from '../models/user.model';
+import { AuthCredentials, AuthenticatedUser, User, UserData } from '../models/user.model';
 import { AuthService } from '../services/auth.service';
 import { InternalError } from '../server';
 import { authenticatedUser } from '../guards/auth.guard';
@@ -13,22 +13,18 @@ authRouter.use("/logout", authenticatedUser);
 authRouter.post("/login", async (request, response) => {
 
     try {
-        const user : any = await authService.isUserValid(
+        const userData : UserData | null = await authService.getUserByCredentials(
             request.body.username,
             request.body.password
         );
-        if (user) {
+        if (userData) {
             
-            const authCredentials : AuthCredentials = await authService.authenticateUser(user?.id);
+            const authCredentials : AuthCredentials = await authService.authenticateUser(userData?.id);
 
             response.status(200);
             response.send({
                 authentication: authCredentials,
-                user: {
-                    id: user._id,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                }
+                user: userData
             });
         }
     }

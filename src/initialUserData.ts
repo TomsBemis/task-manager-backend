@@ -1,15 +1,15 @@
 import { Option } from "./models/option.model";
 
 export const initialRoles: {[key: string]: Option} = {
-    user : {
+    USER : {
         value: "USER",
         displayName: "Regular user"
     },
-    manager: {
+    MANAGER: {
         value: "MANAGER",
         displayName: "Manager"
     },
-    admin: {
+    ADMIN: {
         value: "ADMIN",
         displayName: "Administrator"
     },

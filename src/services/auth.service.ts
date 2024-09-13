@@ -1,5 +1,5 @@
-import { Request } from "express";
-import { AuthCredentials, User, UserModel } from "../models/user.model";
+import { AuthCredentials, User, UserData, UserModel } from "../models/user.model";
+import { UserService } from "./user.service";
     
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -64,14 +64,16 @@ export class AuthService {
         );
     }
 
-    async isUserValid(inputUsername: string, inputPassword: string): Promise<User | null> {
+    async getUserByCredentials(inputUsername: string, inputPassword: string): Promise<UserData | null> {
         const fetchedUser = await UserModel.findOne({ username: inputUsername });
+
+        console.log(fetchedUser);
 
         if(!fetchedUser) throw Error("User with username '"+inputUsername+"' not found");
 
         const valid =  await bcrypt.compare(inputPassword, fetchedUser?.password);
 
-        if(valid) return fetchedUser;
+        if(valid) return UserService.convertToUserData(fetchedUser);
         else throw Error("Invalid user password");
     }
 
