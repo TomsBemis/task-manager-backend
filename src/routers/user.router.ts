@@ -1,6 +1,6 @@
 import { json, Router } from 'express';
 import { UserService } from '../services/user.service';
-import { AuthenticatedUser, User, UserData } from '../models/user.model';
+import { AuthenticatedUser, UserData } from '../models/user.model';
 import { authenticatedUser } from '../guards/auth.guard';
 import { userRoleGuard } from '../guards/user-role.guard';
 import { initialRoles } from '../initialUserData';
@@ -9,8 +9,8 @@ const userRouter = Router();
 const userService = new UserService();
 
 userRouter.use(json());
-userRouter.use("initialize", authenticatedUser, userRoleGuard([initialRoles['admin']], true));
-userRouter.use("/", authenticatedUser, userRoleGuard([initialRoles['admin']], true));
+userRouter.use("initialize", authenticatedUser, userRoleGuard([initialRoles['ADMIN']], true));
+userRouter.use("/", authenticatedUser);
 userRouter.use("/:userId", authenticatedUser);
 
 userRouter.get("/initialize", async (request, response) => {
@@ -28,6 +28,14 @@ userRouter.get("/initialize", async (request, response) => {
 
 userRouter.get("/", async (request, response) => {
     try {
+
+        const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
+        if(authenticatedUser.user.role !== "ADMIN") {
+            response.status(401);
+            response.json({ error: "Only users with administrator priviledges have access." });
+            return;
+        }
+
         response.json({
             users: await userService.getUsers()
         });
@@ -40,8 +48,8 @@ userRouter.get("/", async (request, response) => {
 });
 
 userRouter.get("/:userId", async (request, response) => {
+    
     const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
-
     if(authenticatedUser.user.role !== "ADMIN") {
         if(request.params.userId !== authenticatedUser.userId) {
             response.status(401);
@@ -77,6 +85,13 @@ userRouter.get("/:userId", async (request, response) => {
 
 userRouter.post("/:userId", async (request, response) => {
     try {
+
+        const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
+        if(authenticatedUser.user.role !== "ADMIN") {
+            response.status(401);
+            response.json({ error: "Only users with administrator priviledges have access." });
+            return;
+        }
 
         let updatedUser: UserData | null = await userService.updateRoles(request.params.userId, request.body.roles);
 
