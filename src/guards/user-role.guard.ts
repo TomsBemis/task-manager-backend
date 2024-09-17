@@ -14,15 +14,20 @@ export const userRoleGuard = (criteriaRoles: Option[], whitelist: boolean) => {
             return;
         }
 
-        let matchingRole: Option | undefined = undefined;
-        if(whitelist) { // If at least one of the roles matches then allow the user access to the route
-            matchingRole = criteriaRoles.find(criteriaRole => {
-                return criteriaRole.value == authenticatedUser.user.role
-            });
-            if(matchingRole) {
-                next();
-                return;
-            }
+        // Check if user has appropriate role
+        let matchingRoleFound: boolean = false;
+
+        criteriaRoles.every(criteriaRole => {
+            if(criteriaRole.value == authenticatedUser.user.role) matchingRoleFound = true;
+        });
+
+        // If role is whitelisted and found in user's roles then allow access
+        // If role is blacklisted deny access if the user has it
+        if (whitelist && matchingRoleFound || !whitelist && !matchingRoleFound) {
+            next();
+            return;
+        }
+        else {
             response.status(401);
             response.json({ error: 
                 "Only users with roles "+
@@ -31,17 +36,5 @@ export const userRoleGuard = (criteriaRoles: Option[], whitelist: boolean) => {
             });
             return;
         }
-        else {  // If at least one of the roles matches then the user is blacklisted to access the route      
-            matchingRole = criteriaRoles.find(criteriaRole => {
-                return criteriaRole.value == authenticatedUser.user.role
-            });
-            if(matchingRole) {
-                response.status(401);
-                    response.json({ error: "Users with user role '"+matchingRole.displayName+"' are not allowed to access this resource." });
-                    return;
-            }
-            next();
-        }
-        return;
     }
 }
