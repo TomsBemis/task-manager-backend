@@ -39,13 +39,11 @@ export const TaskSchema = new Schema<Task>(
 
 export const TaskModel = model<Task>('tasks', TaskSchema);
 
-export function toBasicTask(task : any) {
-    return {
-        id: task.id,
-        title: task.title, 
-        type: {
-            value: task.type.value,
-            displayName: task.type.displayName
-        }
-    }
+export interface BasicTask {
+    id: string,
+    title: string,
+    type: {
+        value: string,
+        displayName: string
+    },
 }

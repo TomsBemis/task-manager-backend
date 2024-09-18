@@ -1,5 +1,5 @@
-import { Request } from "express";
-import { AuthCredentials, LoginResponse, User, UserData, UserModel } from "./models/user.model";
+import { AuthCredentials, User, UserData, UserModel } from "../models/user.model";
+import { UserService } from "./user.service";
     
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -35,8 +35,20 @@ export class AuthService {
         
     }
 
-    public async getUserById(userId: string): Promise<UserData | null> {
-        return await UserModel.findById(userId);
+    // Compare JWT access token by taking user id in JWT content and checking if user data matches
+    public async isAccessTokenValid(accessToken: string): Promise<{ userId: string, user: User} | null> {
+        return jwt.verify(accessToken, process.env.AUTH_TOKEN_SECRET as string, async (error: Error, tokenContent: any) => {
+
+            if (error) throw Error("Invalid JSON web token: " + error.message);
+            const fetchedUser: User | null = await UserModel.findById(tokenContent.userId);
+            if (!fetchedUser) throw Error("Invalid JSON web token: could not find user by ID provided in token");
+            if (accessToken !== fetchedUser.accessToken) throw Error("Invalid JSON web token: specified user has different access token");
+
+            return {
+                userId: tokenContent.userId,
+                user: fetchedUser
+            };    // All conditions for valid access token are met
+        });
     }
 
     public async removeUserToken(userId: string): Promise<void> {
@@ -44,49 +56,27 @@ export class AuthService {
         // Update user token and expiration date in DB
         await UserModel.findOneAndUpdate(
             { _id: userId },
-            { $set: { token: "" } },
+            { $set: { 
+                accessToken: "",
+                refreshToken: "",
+                }},
             { new: true }
         );
     }
 
-    async isUserValid(request: Request): Promise<User | null> {
-        const fetchedUser = await UserModel.findOne({ username: request.body.username });
+    async getUserByCredentials(inputUsername: string, inputPassword: string): Promise<UserData | null> {
+        const fetchedUser = await UserModel.findOne({ username: inputUsername });
 
-        const valid =  await bcrypt.compare(request.body.password, fetchedUser?.password);
+        if(!fetchedUser) throw Error("User with username '"+inputUsername+"' not found");
 
-        if(valid) return fetchedUser;
+        const valid =  await bcrypt.compare(inputPassword, fetchedUser?.password);
+
+        if(valid) return UserService.convertToUserData(fetchedUser);
         else throw Error("Invalid user password");
     }
 
     private getAuthToken(userId : string, tokenTimespan : number | null) {
         if (!tokenTimespan) return jwt.sign({userId: userId}, process.env.AUTH_TOKEN_SECRET);
         return jwt.sign({userId: userId}, process.env.AUTH_TOKEN_SECRET, { expiresIn: tokenTimespan });
-    }
-
-    public verifyToken(request : Request) : { valid: boolean, message : string} {
-        const token = request.headers['authorization'];
-
-        if (!token) {
-            return {
-                valid : false,
-                message : "Missing JWT in 'authorization' header."
-            };
-        }
-
-        jwt.verify(token, process.env.AUTH_TOKEN_SECRET as string, (error: Error, user: any) => {
-            
-
-            if (error) {
-                return {
-                    valid : false,
-                    message : error.message
-                };
-            }
-        });
-
-        return {
-            valid : true,
-            message : "JWT is valid."
-        }
     }
 }

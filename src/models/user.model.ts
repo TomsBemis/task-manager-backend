@@ -1,24 +1,27 @@
 import {Schema, model} from 'mongoose';
+import { Option } from './option.model';
+
+// User model
 
 export interface User {
-    _id: string,
     username: string,
     password: string,
     firstName: string,
     lastName: string,
-    accessToken: string,
-    refreshToken: string
+    accessToken: string | null,
+    refreshToken: string | null,
+    role: string
 }
 
 export const UserSchema = new Schema<User>(
     {
-        _id: {type: String, required: true},
         username: {type: String, required: true},
         password: {type: String, required: true},
         firstName: {type: String, required: true},
         lastName: {type: String, required: true},
         accessToken: {type: String},
         refreshToken: {type: String},
+        role: {type: String, required: true},
     },
     {
         toJSON: {
@@ -33,19 +36,27 @@ export const UserSchema = new Schema<User>(
 
 export const UserModel = model<User>('users', UserSchema);
 
+// Other interfaces
+
 export interface UserData {
     id: string,
     firstName: string,
     lastName: string,
-}
-
-export interface LoginResponse {
-    authentication: AuthCredentials
-    user: User,
+    role: Option
 }
 
 export interface AuthCredentials {
     accessToken: string,
     refreshToken: string,
     userId: string,
+}
+
+export interface AuthenticatedUser {
+    userId: string,
+    user: User
+}
+
+export interface UserRole {
+    role: Option, 
+    enabled: boolean
 }
