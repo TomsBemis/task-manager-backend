@@ -6,6 +6,11 @@ import { AuthenticatedUser } from "../models/user.model";
 export const userRoleGuard = (criteriaRoles: Option[], whitelist: boolean) => {
     return (request: Request, response: Response, next: NextFunction) => {
 
+        console.log({
+            route: request.url,
+            criteriaRoles: criteriaRoles
+        });
+
         // Fetch user that was appended to the request by auth guard
         const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
         if(!authenticatedUser) {
@@ -18,7 +23,7 @@ export const userRoleGuard = (criteriaRoles: Option[], whitelist: boolean) => {
         let matchingRoleFound: boolean = false;
 
         criteriaRoles.every(criteriaRole => {
-            if(criteriaRole.value == authenticatedUser.user.role) matchingRoleFound = true;
+            if(authenticatedUser.user.roles.includes(criteriaRole.value)) matchingRoleFound = true;
         });
 
         // If role is whitelisted and found in user's roles then allow access

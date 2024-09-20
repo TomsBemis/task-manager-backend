@@ -10,7 +10,7 @@ export interface User {
     lastName: string,
     accessToken: string | null,
     refreshToken: string | null,
-    role: string
+    roles: string[]
 }
 
 export const UserSchema = new Schema<User>(
@@ -21,7 +21,7 @@ export const UserSchema = new Schema<User>(
         lastName: {type: String, required: true},
         accessToken: {type: String},
         refreshToken: {type: String},
-        role: {type: String, required: true},
+        roles: [{type: String, required: true}],
     },
     {
         toJSON: {
@@ -42,7 +42,7 @@ export interface UserData {
     id: string,
     firstName: string,
     lastName: string,
-    role: Option
+    roles: Option[]
 }
 
 export interface AuthCredentials {

@@ -9,32 +9,10 @@ const userRouter = Router();
 const userService = new UserService();
 
 userRouter.use(json());
-userRouter.use("initialize", authenticatedUser, userRoleGuard([initialRoles['ADMIN']], true));
-userRouter.use("/", authenticatedUser);
-userRouter.use("/:userId", authenticatedUser);
-
-userRouter.get("/initialize", async (request, response) => {
-
-    try {
-        UserService.initializeUsers();
-        response.send("Database is intialized");
-    }
-    catch (error) {
-        console.log(error);
-        response.status(500);
-        response.send(error);
-    }
-});
+userRouter.use(authenticatedUser);
 
 userRouter.get("/", async (request, response) => {
     try {
-
-        const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
-        if(authenticatedUser.user.role !== "ADMIN") {
-            response.status(401);
-            response.json({ error: "Only users with administrator priviledges have access." });
-            return;
-        }
 
         response.json({
             users: await userService.getUsers()
@@ -45,12 +23,12 @@ userRouter.get("/", async (request, response) => {
         response.status(500);
         response.send(error);
     }
-});
+}).use(userRoleGuard([initialRoles['ADMIN']], true));
 
 userRouter.get("/:userId", async (request, response) => {
     
     const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
-    if(authenticatedUser.user.role !== "ADMIN") {
+    if(!authenticatedUser.user.roles.includes("ADMIN")) {
         if(request.params.userId !== authenticatedUser.userId) {
             response.status(401);
             response.json({ error: "Only users with administrator priviledges or users owners have access." });
@@ -87,7 +65,7 @@ userRouter.post("/:userId", async (request, response) => {
     try {
 
         const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
-        if(authenticatedUser.user.role !== "ADMIN") {
+        if(!authenticatedUser.user.roles.includes("ADMIN")) {
             response.status(401);
             response.json({ error: "Only users with administrator priviledges have access." });
             return;
@@ -110,6 +88,6 @@ userRouter.post("/:userId", async (request, response) => {
             error: error.message
         });
     }
-});
+}).use(userRoleGuard([initialRoles['ADMIN']], true));
 
 export default userRouter;

@@ -40,7 +40,7 @@ export class UserService {
                                 lastName: initialUser.lastName,
                                 accessToken: null,
                                 refreshToken: null,
-                                role: initialUser.role,
+                                roles: initialUser.roles,
                             });
                         });
                     });
@@ -78,7 +78,7 @@ export class UserService {
 
         await UserModel.updateOne(
             { _id: userId },
-            { $set: {role: managerRole[0].enabled ? "MANAGER" : "USER"} }
+            { $set: {roles: managerRole[0].enabled ? "MANAGER" : "USER"} }
         )
 
         return UserService.convertToUserData(await UserModel.findOne({ _id: userId }));
@@ -86,14 +86,17 @@ export class UserService {
 
     /* Method to be used to hide user password and retrieve full role data */
     public static convertToUserData(user: any){   // Setting parameter type to User doesn't allow fetching hidden field '_id'
-
-        let foundRole = initialRoles[user.role];
-        if(!foundRole) throw Error("Role value "+user.role+" not found!");
+    
+        let foundRoles: Option[] = [];
+        user.roles.forEach((role: string) => {
+            foundRoles.push(initialRoles[role]);
+        })
+        if(!foundRoles) throw Error("Role value "+user.role+" not found!");
         return {
             id: user._id,
             firstName: user.firstName,
             lastName: user.lastName,
-            role: foundRole
+            roles: foundRoles
         };
     }
 }

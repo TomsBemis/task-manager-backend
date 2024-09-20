@@ -67,7 +67,9 @@ export class AuthService {
     async getUserByCredentials(inputUsername: string, inputPassword: string): Promise<UserData | null> {
         const fetchedUser = await UserModel.findOne({ username: inputUsername });
 
-        if(!fetchedUser) throw Error("User with username '"+inputUsername+"' not found");
+        if(!fetchedUser) {
+            throw Error("User with username '"+inputUsername+"' not found");
+        }
 
         const valid =  await bcrypt.compare(inputPassword, fetchedUser?.password);
 
