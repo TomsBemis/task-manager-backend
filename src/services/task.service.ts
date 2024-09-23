@@ -1,39 +1,55 @@
 import { initialTaskTypes, initialTaskStatuses, initialTasks } from "../initialTaskData";
 import { Option, TaskStatusModel, TaskTypeModel } from "../models/option.model";
 import { TaskModel, Task, BasicTask } from "../models/task.model";
-
+import { UserModel } from "../models/user.model";
+import { UserService } from "./user.service";
 
 export class TaskService {
 
     static async initializeTasks(): Promise<void> {
+
+        // Delete tasks, their types and statuses before initializing
+        await TaskModel.deleteMany({});
+        await TaskTypeModel.deleteMany({});
+        await TaskStatusModel.deleteMany({});
             
         // Initialize task types
-        if(!await TaskTypeModel.countDocuments()) await TaskTypeModel.create(initialTaskTypes);
+        await TaskTypeModel.create(initialTaskTypes);
         let taskTypes = await TaskTypeModel.find();
 
         // Initialize task statuses
-        if(!await TaskStatusModel.countDocuments()) await TaskStatusModel.create(initialTaskStatuses);
+        await TaskStatusModel.create(initialTaskStatuses);
         let taskStatuses = await TaskStatusModel.find();
 
-        if(!await TaskModel.countDocuments()) {
+        let tasks : Task[] = [];
 
-            let tasks : Task[] = [];
-            
-            initialTasks.forEach(initialTask => {
-                tasks.push({
-                    title: initialTask.title,
-                    description: initialTask.description,
-                    type: taskTypes.find( taskType => 
-                        taskType.value == initialTask.type
-                    ) as Option,
-                    status: taskStatuses.find( taskStatus => 
-                        taskStatus.value == initialTask.status
-                    ) as Option,
-                });
+        let users = await UserModel.find();
+        let taskUser: any = null;
+
+        initialTasks.forEach(async initialTask => {
+            taskUser = null;
+            if(initialTask.assignedUser) {
+                taskUser = UserService.convertToUserData(
+                    users.find(
+                        user => user.id == initialTask.assignedUser
+                    )
+                );
+                taskUser.roles = taskUser.roles.map((role: Option) => role.value);
+            }
+            tasks.push({
+                title: initialTask.title,
+                description: initialTask.description,
+                type: taskTypes.find( taskType => 
+                    taskType.value == initialTask.type
+                ) as Option,
+                status: taskStatuses.find( taskStatus => 
+                    taskStatus.value == initialTask.status
+                ) as Option,
+                assignedUser: taskUser
             });
+        });
 
-            await TaskModel.create(tasks);
-        };
+        await TaskModel.create(tasks);
     }
 
     public async getEssentialTaskData() {

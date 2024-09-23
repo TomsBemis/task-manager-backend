@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { initialRoles, initialUsers } from "../initialUserData";
 import { Option, RoleModel } from "../models/option.model";
 import { UserData, UserModel, UserRole } from "../models/user.model";
@@ -34,6 +35,7 @@ export class UserService {
                             if (error) throw new Error("Error while hashing password: "+error.message);
             
                             await UserModel.collection.insertOne({
+                                _id: new ObjectId(initialUser._id),
                                 username: initialUser.username,
                                 password: hash,
                                 firstName: initialUser.firstName,
