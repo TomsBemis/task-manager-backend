@@ -3,6 +3,8 @@ import { authenticatedUser } from '../guards/auth.guard';
 import { TaskService } from '../services/task.service';
 import { userRoleGuard } from '../guards/user-role.guard';
 import { initialRoles } from '../initialUserData';
+import { AuthenticatedUser, UserData, UserModel } from '../models/user.model';
+import { UserService } from '../services/user.service';
 
 const taskRouter = Router();
 const taskService = new TaskService();
@@ -29,8 +31,26 @@ taskRouter.get("/", async (request, response) => {
 });
 
 taskRouter.get("/:taskId", async (request, response) => {
+
+    const taskById = await taskService.getTaskById(request.params.taskId);
     
-    response.send(await taskService.getTaskById(request.params.taskId));
+    // If authenticated user is a manager, add assignable users to response
+    const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
+    if(authenticatedUser.user.roles.includes("MANAGER")) {
+        const assignableUsers: UserData[] = [];
+        (await UserModel.find({ roles: { $elemMatch: {$in: "USER"} }})).forEach(user => {
+            assignableUsers.push(UserService.convertToUserData(user))
+        });
+
+        response.send({
+            task: taskById,
+            assignableUsers: assignableUsers
+        });
+        return;
+    }
+    response.send({
+        task: taskById
+    });
 
 });
 

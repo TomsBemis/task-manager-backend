@@ -6,11 +6,6 @@ import { AuthenticatedUser } from "../models/user.model";
 export const userRoleGuard = (criteriaRoles: Option[], whitelist: boolean) => {
     return (request: Request, response: Response, next: NextFunction) => {
 
-        console.log({
-            route: request.url,
-            criteriaRoles: criteriaRoles
-        });
-
         // Fetch user that was appended to the request by auth guard
         const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
         if(!authenticatedUser) {
