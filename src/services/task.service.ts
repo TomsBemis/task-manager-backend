@@ -1,7 +1,7 @@
 import { initialTaskTypes, initialTaskStatuses, initialTasks } from "../initialTaskData";
 import { Option, TaskStatusModel, TaskTypeModel } from "../models/option.model";
 import { TaskModel, Task, BasicTask } from "../models/task.model";
-import { UserModel } from "../models/user.model";
+import { User, UserModel } from "../models/user.model";
 import { UserService } from "./user.service";
 
 export class TaskService {
@@ -80,13 +80,24 @@ export class TaskService {
         return await TaskModel.create(taskData);
     }
 
-    public async updateTask(taskId: string, taskData: Task): Promise<Task | null> {
+    public async updateTask(taskId: string, taskData: any): Promise<Task | null> {
 
-        // Validate that new task title is unique
+        // Validate that updated task title is unique if it is changed
         const taskTitles = (await TaskModel.find())
-            .filter(task => task.id == taskId)
+            .filter(task => task.id != taskId)
             .map(task => task.title);
-        if (taskTitles.includes(taskData.title)) throw Error("Task title must be unique");
+        if (taskTitles.includes(taskData.title)) {
+            throw Error("Task title must be unique");
+        }
+
+        // Validate that assigned user is null or valid user ID
+        let fetchedUser: any = null;
+        if(taskData.assignedUser) {
+            fetchedUser = await UserModel.findById(taskData.assignedUser);
+            if(!fetchedUser) throw Error("Assigned user not found");
+        }
+        taskData.assignedUser = UserService.convertToUserData(fetchedUser);
+        taskData.assignedUser.roles = taskData.assignedUser.roles.map((role: any) => role.value);
 
         // Update by id
         await TaskModel.updateOne(

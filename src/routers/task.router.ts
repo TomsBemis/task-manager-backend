@@ -36,7 +36,7 @@ taskRouter.get("/:taskId", async (request, response) => {
     
     // If authenticated user is a manager, add assignable users to response
     const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
-    if(authenticatedUser.user.roles.includes("MANAGER")) {
+    if(authenticatedUser.user.roles.includes("ADMIN")) {
         const assignableUsers: UserData[] = [];
         (await UserModel.find({ roles: { $elemMatch: {$in: "USER"} }})).forEach(user => {
             assignableUsers.push(UserService.convertToUserData(user))
