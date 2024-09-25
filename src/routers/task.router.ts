@@ -80,7 +80,9 @@ taskRouter.delete("/:taskId", async (request, response) => {
 taskRouter.patch("/:taskId", async (request, response) => {
     
     try {
-        response.send(await taskService.updateTask(request.params.taskId, request.body));
+        const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
+        const taskData = await taskService.validateTaskData(authenticatedUser.user, request.params.taskId, request.body);
+        response.send(await taskService.updateTask(request.params.taskId, taskData));
     }
     catch (error: any) {
         response.status(400).send({error: error.message});

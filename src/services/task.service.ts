@@ -1,7 +1,8 @@
+import e from "cors";
 import { initialTaskTypes, initialTaskStatuses, initialTasks } from "../initialTaskData";
 import { Option, TaskStatusModel, TaskTypeModel } from "../models/option.model";
 import { TaskModel, Task, BasicTask } from "../models/task.model";
-import { User, UserModel } from "../models/user.model";
+import { User, UserData, UserModel } from "../models/user.model";
 import { UserService } from "./user.service";
 
 export class TaskService {
@@ -82,23 +83,6 @@ export class TaskService {
 
     public async updateTask(taskId: string, taskData: any): Promise<Task | null> {
 
-        // Validate that updated task title is unique if it is changed
-        const taskTitles = (await TaskModel.find())
-            .filter(task => task.id != taskId)
-            .map(task => task.title);
-        if (taskTitles.includes(taskData.title)) {
-            throw Error("Task title must be unique");
-        }
-
-        // Validate that assigned user is null or valid user ID
-        let fetchedUser: any = null;
-        if(taskData.assignedUser) {
-            fetchedUser = await UserModel.findById(taskData.assignedUser);
-            if(!fetchedUser) throw Error("Assigned user not found");
-        }
-        taskData.assignedUser = UserService.convertToUserData(fetchedUser);
-        taskData.assignedUser.roles = taskData.assignedUser.roles.map((role: any) => role.value);
-
         // Update by id
         await TaskModel.updateOne(
             { _id: taskId },
@@ -107,6 +91,41 @@ export class TaskService {
 
         // Fetch updated task
         return await TaskModel.findOne({ _id: taskId });
+    }
+
+    public async validateTaskData(currentUser: User, taskId: string, taskData: any) {
+
+        if(!currentUser.roles.includes("ADMIN") && !currentUser.roles.includes("MANAGER")) {
+            throw Error("Only users with the roles admin or manager can update a task");
+        }
+
+        if(currentUser.roles.includes("ADMIN")) {
+            // Remove only assigned user from task data
+            delete taskData.assignedUser;
+
+            // Validate that updated task title is unique if it is changed
+            const taskTitles = (await TaskModel.find())
+                .filter(task => task.id != taskId)
+                .map(task => task.title);
+            if (taskTitles.includes(taskData.title)) {
+                throw Error("Task title must be unique");
+            }
+            
+        }
+        else if(currentUser.roles.includes("MANAGER")) {
+            // Remove all task data except assigned user
+            let fetchedUser: any = null;
+            if(taskData.assignedUser) {
+                fetchedUser = await UserModel.findById(taskData.assignedUser);
+                if(!fetchedUser) throw Error("Assigned user not found");
+            }
+            taskData.assignedUser = UserService.convertToUserData(fetchedUser);
+            taskData.assignedUser.roles = taskData.assignedUser.roles.map((role: any) => role.value);
+            taskData = {
+                assignedUser: taskData.assignedUser
+            }
+        }
+        return taskData;
     }
 
     public async deleteTask(taskId: string): Promise<Task[]> {
