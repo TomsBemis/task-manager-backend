@@ -12,11 +12,11 @@ const taskService = new TaskService();
 taskRouter.use(json());
 taskRouter.use(authenticatedUser);
 
-// User allowed routes
-taskRouter.get(
-    ["/", "/essential-task-data", "/:taskId"], 
-    userRoleGuard([initialRoles['USER']], true)
-);
+taskRouter.get(["/", "/essential-task-data", "/:taskId"], userRoleGuard([initialRoles['USER']], true));
+taskRouter.get(["/initialize"], userRoleGuard([initialRoles['ADMIN']], true));
+taskRouter.post(["/"], userRoleGuard([initialRoles['ADMIN']], true));
+taskRouter.delete(["/:taskId"], userRoleGuard([initialRoles['ADMIN']], true));
+taskRouter.patch(["/:taskId"], userRoleGuard([initialRoles['ADMIN'], initialRoles['MANAGER']], true));
 
 taskRouter.get("/essential-task-data", async (request, response) => {
  
@@ -36,7 +36,7 @@ taskRouter.get("/:taskId", async (request, response) => {
     
     // If authenticated user is a manager, add assignable users to response
     const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
-    if(authenticatedUser.user.roles.includes("ADMIN")) {
+    if(authenticatedUser.user.roles.includes("MANAGER")) {
         const assignableUsers: UserData[] = [];
         (await UserModel.find({ roles: { $elemMatch: {$in: "USER"} }})).forEach(user => {
             assignableUsers.push(UserService.convertToUserData(user))
@@ -54,11 +54,9 @@ taskRouter.get("/:taskId", async (request, response) => {
 
 });
 
-// Admin allowed routes
-
 taskRouter.get("/initialize", async (request, response) => {
     return await TaskService.initializeTasks();
-}).use(userRoleGuard([initialRoles['ADMIN']], true));
+});
 
 taskRouter.post("/", async (request, response) => {
 
@@ -69,13 +67,13 @@ taskRouter.post("/", async (request, response) => {
         response.status(400).send({error: error.message});
     }
 
-}).use(userRoleGuard([initialRoles['ADMIN']], true));
+});
 
 taskRouter.delete("/:taskId", async (request, response) => {
 
     response.send(await taskService.deleteTask(request.params.taskId));
 
-}).use(userRoleGuard([initialRoles['ADMIN']], true));
+});
 
 taskRouter.patch("/:taskId", async (request, response) => {
     
@@ -87,7 +85,6 @@ taskRouter.patch("/:taskId", async (request, response) => {
     catch (error: any) {
         response.status(400).send({error: error.message});
     }
-
-}).use(userRoleGuard([initialRoles['ADMIN']], true));
+});
 
 export default taskRouter;

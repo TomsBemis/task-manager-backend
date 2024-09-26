@@ -1,8 +1,7 @@
-import e from "cors";
 import { initialTaskTypes, initialTaskStatuses, initialTasks } from "../initialTaskData";
 import { Option, TaskStatusModel, TaskTypeModel } from "../models/option.model";
 import { TaskModel, Task, BasicTask } from "../models/task.model";
-import { User, UserData, UserModel } from "../models/user.model";
+import { User, UserModel } from "../models/user.model";
 import { UserService } from "./user.service";
 
 export class TaskService {
