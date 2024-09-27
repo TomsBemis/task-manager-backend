@@ -17,8 +17,8 @@ export const userRoleGuard = (criteriaRoles: Option[], whitelist: boolean) => {
         // Check if user has appropriate role
         let matchingRoleFound: boolean = false;
 
-        criteriaRoles.every(criteriaRole => {
-            if(criteriaRole.value == authenticatedUser.user.role) matchingRoleFound = true;
+        criteriaRoles.forEach(criteriaRole => {
+            if(authenticatedUser.user.roles.includes(criteriaRole.value)) matchingRoleFound = true;
         });
 
         // If role is whitelisted and found in user's roles then allow access

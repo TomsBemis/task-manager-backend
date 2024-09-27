@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { initialRoles, initialUsers } from "../initialUserData";
 import { Option, RoleModel } from "../models/option.model";
 import { UserData, UserModel, UserRole } from "../models/user.model";
@@ -34,13 +35,14 @@ export class UserService {
                             if (error) throw new Error("Error while hashing password: "+error.message);
             
                             await UserModel.collection.insertOne({
+                                _id: new ObjectId(initialUser._id),
                                 username: initialUser.username,
                                 password: hash,
                                 firstName: initialUser.firstName,
                                 lastName: initialUser.lastName,
                                 accessToken: null,
                                 refreshToken: null,
-                                role: initialUser.role,
+                                roles: initialUser.roles,
                             });
                         });
                     });
@@ -78,22 +80,20 @@ export class UserService {
 
         await UserModel.updateOne(
             { _id: userId },
-            { $set: {role: managerRole[0].enabled ? "MANAGER" : "USER"} }
+            { $set: {roles: managerRole[0].enabled ? "MANAGER" : "USER"} }
         )
 
         return UserService.convertToUserData(await UserModel.findOne({ _id: userId }));
     }
 
-    /* Method to be used to hide user password and retrieve full role data */
-    public static convertToUserData(user: any){   // Setting parameter type to User doesn't allow fetching hidden field '_id'
-
-        let foundRole = initialRoles[user.role];
-        if(!foundRole) throw Error("Role value "+user.role+" not found!");
+    // Method for converting full user object into a object with only the basic information
+    public static convertToUserData(user: any) : UserData {   // Setting parameter type to User doesn't allow fetching hidden field '_id'
+    
         return {
             id: user._id,
             firstName: user.firstName,
             lastName: user.lastName,
-            role: foundRole
+            roles: user.roles
         };
     }
 }

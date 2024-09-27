@@ -1,4 +1,5 @@
-import {Schema, model} from 'mongoose';
+import mongoose, {Schema, model} from 'mongoose';
+import { UserData } from './user.model';
 
 export interface Task {
     title: string, 
@@ -10,7 +11,8 @@ export interface Task {
     status: {
         value: string,
         displayName: string
-    }
+    },
+    assignedUser: UserData | null
 }
 
 export const TaskSchema = new Schema<Task>(
@@ -24,6 +26,14 @@ export const TaskSchema = new Schema<Task>(
         status: {
             value: {type: String, required: true},
             displayName: {type: String, required: true}
+        },
+        assignedUser: {
+            type: {
+                id: {type: String, required: true},
+                firstName: {type: String, required: true},
+                lastName: {type: String, required: true},
+                roles: [{type: String, required: true}],
+            }, required: false
         }
     },
     {
