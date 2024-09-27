@@ -86,19 +86,14 @@ export class UserService {
         return UserService.convertToUserData(await UserModel.findOne({ _id: userId }));
     }
 
-    /* Method to be used to hide user password and retrieve full role data */
-    public static convertToUserData(user: any){   // Setting parameter type to User doesn't allow fetching hidden field '_id'
+    // Method for converting full user object into a object with only the basic information
+    public static convertToUserData(user: any) : UserData {   // Setting parameter type to User doesn't allow fetching hidden field '_id'
     
-        let foundRoles: Option[] = [];
-        user.roles.forEach((role: string) => {
-            foundRoles.push(initialRoles[role]);
-        })
-        if(!foundRoles) throw Error("Role value "+user.role+" not found!");
         return {
             id: user._id,
             firstName: user.firstName,
             lastName: user.lastName,
-            roles: foundRoles
+            roles: user.roles
         };
     }
 }

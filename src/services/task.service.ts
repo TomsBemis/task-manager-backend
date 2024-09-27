@@ -34,7 +34,6 @@ export class TaskService {
                         user => user.id == initialTask.assignedUser
                     )
                 );
-                taskUser.roles = taskUser.roles.map((role: Option) => role.value);
             }
             tasks.push({
                 title: initialTask.title,
@@ -119,7 +118,6 @@ export class TaskService {
                 if(!fetchedUser) throw Error("Assigned user not found");
             }
             taskData.assignedUser = UserService.convertToUserData(fetchedUser);
-            taskData.assignedUser.roles = taskData.assignedUser.roles.map((role: any) => role.value);
             taskData = {
                 assignedUser: taskData.assignedUser
             }
