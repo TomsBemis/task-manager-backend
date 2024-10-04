@@ -1,4 +1,5 @@
 import { AuthCredentials, User, UserData, UserModel } from "../models/user.model";
+import { InternalError } from "../server";
 import { UserService } from "./user.service";
     
 const jwt = require('jsonwebtoken');
@@ -8,30 +9,7 @@ export class AuthService {
 
     async authenticateUser(userId : string) : Promise<AuthCredentials> {
         
-        if(process.env.AUTH_TOKEN_SECRET && process.env.AUTH_TOKEN_TIMESPAN) {
-            const tokenTimespan = +(process.env.AUTH_TOKEN_TIMESPAN ?? 0) * 1000;
-            const generatedAccessToken = this.getAuthToken(userId, tokenTimespan);
-            const generatedRefreshToken = this.getAuthToken(userId, null);
-
-            // Update user token and expiration date in DB
-            await UserModel.findOneAndUpdate(
-                { _id: userId },
-                { $set: {
-                    accessToken: generatedAccessToken,
-                    refreshToken: generatedRefreshToken
-                }},
-                { new: true }
-            );
-
-            return {
-                accessToken : generatedAccessToken,
-                refreshToken : generatedRefreshToken,
-                userId : userId,
-            };
-        }
-        else {
-            throw new Error("Authentication token settings not configured");
-        }
+        return await this.setAuthToken(userId);
         
     }
 
@@ -64,17 +42,76 @@ export class AuthService {
         );
     }
 
-    async getUserByCredentials(inputUsername: string, inputPassword: string): Promise<UserData | null> {
+    async getUserByCredentials(inputUsername: string, inputPassword: string | null): Promise<UserData> {
         const fetchedUser = await UserModel.findOne({ username: inputUsername });
 
         if(!fetchedUser) {
             throw Error("User with username '"+inputUsername+"' not found");
         }
 
-        const valid =  await bcrypt.compare(inputPassword, fetchedUser?.password);
+        if(inputPassword) {
+            const valid =  await bcrypt.compare(inputPassword, fetchedUser?.password);
 
-        if(valid) return UserService.convertToUserData(fetchedUser);
-        else throw Error("Invalid user password");
+            if(valid) return UserService.convertToUserData(fetchedUser);
+            else throw Error("Invalid user password");
+        }
+
+        return UserService.convertToUserData(fetchedUser);        
+    }
+
+    async registerUser(newUserData : any): Promise<AuthCredentials> {
+
+        if(process.env.SALT_ROUNDS) {
+
+            // Generate salt
+            return bcrypt.genSalt(+process.env.SALT_ROUNDS, async (error: Error, salt: string) => {
+
+                if (error) throw new Error("Error while generating salt: "+error.message);
+                
+                // Hash password
+                return await bcrypt.hash(newUserData.password, salt, async (error: Error, hash: string) => {
+
+                    if (error) throw new Error("Error while hashing password: "+error.message);
+
+                    newUserData.password = hash;
+                    newUserData.roles = ["USER"];   // Default user role
+                    const newUser: any = await UserModel.create(newUserData);
+
+                    return {
+                        authentication: await this.setAuthToken(newUser.id),
+                        user: newUser
+                    };
+                });
+            });
+        }
+        else throw new InternalError("Authentication settings not configured");
+    }
+
+    private async setAuthToken(userId: string): Promise<AuthCredentials> {
+        if(process.env.AUTH_TOKEN_SECRET && process.env.AUTH_TOKEN_TIMESPAN) {
+            const tokenTimespan = +(process.env.AUTH_TOKEN_TIMESPAN ?? 0) * 1000;
+            const generatedAccessToken = this.getAuthToken(userId, tokenTimespan);
+            const generatedRefreshToken = this.getAuthToken(userId, null);
+
+            // Update user token and expiration date in DB
+            await UserModel.findOneAndUpdate(
+                { _id: userId },
+                { $set: {
+                    accessToken: generatedAccessToken,
+                    refreshToken: generatedRefreshToken
+                }},
+                { new: true }
+            );
+
+            return {
+                accessToken : generatedAccessToken,
+                refreshToken : generatedRefreshToken,
+                userId : userId,
+            };
+        }
+        else {
+            throw new Error("Authentication token settings not configured");
+        }
     }
 
     private getAuthToken(userId : string, tokenTimespan : number | null) {

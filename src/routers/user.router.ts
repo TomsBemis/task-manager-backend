@@ -11,6 +11,9 @@ const userService = new UserService();
 userRouter.use(json());
 userRouter.use(authenticatedUser);
 
+userRouter.get(["/"], userRoleGuard([initialRoles['ADMIN']], true));
+userRouter.post(["/:userId"], userRoleGuard([initialRoles['ADMIN']], true));
+
 userRouter.get("/", async (request, response) => {
     try {
 
@@ -23,7 +26,7 @@ userRouter.get("/", async (request, response) => {
         response.status(500);
         response.send(error);
     }
-}).use(userRoleGuard([initialRoles['ADMIN']], true));
+});
 
 userRouter.get("/:userId", async (request, response) => {
     
@@ -88,6 +91,6 @@ userRouter.post("/:userId", async (request, response) => {
             error: error.message
         });
     }
-}).use(userRoleGuard([initialRoles['ADMIN']], true));
+});
 
 export default userRouter;
