@@ -42,26 +42,23 @@ authRouter.post("/login", async (request, response) => {
 });
 
 authRouter.post("/register", async (request, response) => {
-
     try {
 
-        let userData : UserData;
-        try {
-            userData = await authService.getUserByCredentials(
-                request.body.username,
-                null
-            );
-            // User was found
-            if(await authService.getUserByCredentials(request.body.username, null)) {
-                response.status(400);
-                response.send("Username already exists");
-            }
-        }
-        catch (error) { // User not found by username, new user can be registered
-            if(error instanceof InternalError) throw error;
+        let userExists : boolean;
+        userExists = await authService.userExists(
+            request.body.username,
+            null
+        );
 
-            response.status(200);
-            response.send(await authService.registerUser(request.body));
+        if(userExists) {
+            response.status(400);
+            response.send("Username already exists");
+        }
+        else {
+            await authService.registerUser(request.body).then(registerResponse => {
+                response.status(200);
+                response.send(registerResponse);
+            });
         }
     }
     catch (error) {
@@ -75,7 +72,6 @@ authRouter.post("/register", async (request, response) => {
             response.status(400);
             response.send({error: error.message});
         }
-        
     }
 });
 

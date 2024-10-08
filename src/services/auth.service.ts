@@ -59,28 +59,33 @@ export class AuthService {
         return UserService.convertToUserData(fetchedUser);        
     }
 
+    async userExists(inputUsername: string, inputPassword: string | null): Promise<boolean> {
+        
+        let fetchedUser = null;
+        if(inputPassword) {
+            return await bcrypt.compare(inputPassword, inputPassword);
+        }
+        else fetchedUser = await UserModel.findOne({ username: inputUsername });
+
+        return fetchedUser != null;
+    }
+
     async registerUser(newUserData : any): Promise<AuthCredentials> {
+            
+        newUserData.roles = ["USER"];   // Default user role
 
-        if(process.env.SALT_ROUNDS) {
-
-            // Generate salt
-            return bcrypt.genSalt(+process.env.SALT_ROUNDS, async (error: Error, salt: string) => {
-
-                if (error) throw new Error("Error while generating salt: "+error.message);
-                
-                // Hash password
-                return await bcrypt.hash(newUserData.password, salt, async (error: Error, hash: string) => {
-
-                    if (error) throw new Error("Error while hashing password: "+error.message);
-
-                    newUserData.password = hash;
-                    newUserData.roles = ["USER"];   // Default user role
+        if(process.env.SALT_ROUNDS) {            
+            return await bcrypt.genSalt(+process.env.SALT_ROUNDS).then(async (salt: string) => {
+                return await bcrypt.hash(newUserData.password, salt)
+                .then(async (hashedPassword: string) => {
+                    newUserData.password = hashedPassword;
                     const newUser: any = await UserModel.create(newUserData);
-
-                    return {
-                        authentication: await this.setAuthToken(newUser.id),
-                        user: newUser
-                    };
+                    return await this.setAuthToken(newUser.id).then((authCredentials) => {
+                        return {
+                            authentication: authCredentials,
+                            user: newUser
+                        };
+                    });
                 });
             });
         }
@@ -94,7 +99,7 @@ export class AuthService {
             const generatedRefreshToken = this.getAuthToken(userId, null);
 
             // Update user token and expiration date in DB
-            await UserModel.findOneAndUpdate(
+            const updatedUser: User | null = await UserModel.findOneAndUpdate(
                 { _id: userId },
                 { $set: {
                     accessToken: generatedAccessToken,
