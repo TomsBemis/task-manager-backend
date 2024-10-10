@@ -41,6 +41,40 @@ authRouter.post("/login", async (request, response) => {
     }
 });
 
+authRouter.post("/register", async (request, response) => {
+    try {
+
+        let userExists : boolean;
+        userExists = await authService.userExists(
+            request.body.username,
+            null
+        );
+
+        if(userExists) {
+            response.status(400);
+            response.send("Username already exists");
+        }
+        else {
+            await authService.registerUser(request.body).then(registerResponse => {
+                response.status(200);
+                response.send(registerResponse);
+            });
+        }
+    }
+    catch (error) {
+        console.log(error);
+        if(error instanceof InternalError) 
+        {
+            response.status(500);
+            response.send({error: error.message});
+        }
+        else if(error instanceof Error) {
+            response.status(400);
+            response.send({error: error.message});
+        }
+    }
+});
+
 authRouter.get("/logout", async (request, response) => {
 
     const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
