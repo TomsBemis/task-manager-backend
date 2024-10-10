@@ -50,8 +50,7 @@ export class AuthService {
         }
 
         if(inputPassword) {
-            const valid =  await bcrypt.compare(inputPassword, fetchedUser?.password);
-
+            const valid = await bcrypt.compare(inputPassword, fetchedUser?.password);
             if(valid) return UserService.convertToUserData(fetchedUser);
             else throw Error("Invalid user password");
         }
@@ -61,12 +60,9 @@ export class AuthService {
 
     async userExists(inputUsername: string, inputPassword: string | null): Promise<boolean> {
         
-        let fetchedUser = null;
-        if(inputPassword) {
-            return await bcrypt.compare(inputPassword, inputPassword);
-        }
-        else fetchedUser = await UserModel.findOne({ username: inputUsername });
-
+        if(inputPassword) return await bcrypt.compare(inputPassword, inputPassword);
+        
+        const fetchedUser = await UserModel.findOne({ username: inputUsername });
         return fetchedUser != null;
     }
 
