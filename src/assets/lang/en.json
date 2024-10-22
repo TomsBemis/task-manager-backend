@@ -1,0 +1,54 @@
+{
+    "appName": "Task Manager",
+    "task": {
+        "list" : "Task list",
+        "createTask" : "Create new task",
+        "deleteTask" : "Delete",
+        "editTask" : "Edit",
+        "saveTask" : "Save",
+        "assignedTo" : "Assigned to",
+        "unassigned" : "Unassigned",
+        "createdOn" : "Created on",
+        "modifiedOn" : "Last modified",
+        "title" : "Task title",
+        "description" : "Task description",
+        "taskType" : "Task type",
+        "taskStatus" : "Task status",
+        "assignedUser" : "Assigned user",
+        "typeRequired" : "Type is required",
+        "titleRequired" : "Title is required",
+        "statusRequired" : "Status is required",
+        "titleExists" : "Title already exists",
+        "type" : {
+            "subtask": "Subtask",
+            "story": "Story",
+            "task": "Task"
+        },
+        "status" : {
+            "fixInDev": "Fix in dev",
+            "obsolete": "Obsolete",
+            "inProgress": "In Progress",
+            "done": "Done"
+        }
+    },
+    "user": {
+        "username": "Username",
+        "password": "Password",
+        "retypePassword": "Retype passsword",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "roles": "Roles",
+        "editUser": "Edit",
+        "saveUser": "Save",
+        "welcome": "Welcome",
+        "login": "Login",
+        "logout": "Logout",
+        "register": "Register",
+        "userList": "User list",
+        "role": {
+            "admin": "Administrator",
+            "manager": "Manager",
+            "regularUser": "Regular User"
+        }
+    }
+}

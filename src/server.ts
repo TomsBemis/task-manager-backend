@@ -7,6 +7,7 @@ import authRouter from "./routers/auth.router";
 import userRouter from "./routers/user.router";
 import { UserService } from "./services/user.service";
 import { TaskService } from "./services/task.service";
+import localizationRouter from "./routers/localization.router";
 
 dotenv.config();
 dbConnect();
@@ -20,6 +21,7 @@ app.use(cors({
 app.use("/api/tasks", taskRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
+app.use("/api/localization", localizationRouter);
 
 const port = 5000;
 app.listen(port, () => {

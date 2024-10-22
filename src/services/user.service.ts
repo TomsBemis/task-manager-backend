@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { initialRoles, initialUsers } from "../initialUserData";
+import { initialRoles, initialUsers } from "../assets/initialUserData";
 import { Option, RoleModel } from "../models/option.model";
 import { UserData, UserModel, UserRole } from "../models/user.model";
 

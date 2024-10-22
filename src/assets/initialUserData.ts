@@ -1,4 +1,4 @@
-import { Option } from "./models/option.model";
+import { Option } from "../models/option.model";
 
 export const initialRoles: {[key: string]: Option} = {
     USER : {
