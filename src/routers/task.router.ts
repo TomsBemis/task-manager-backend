@@ -2,7 +2,7 @@ import { json, Router } from 'express';
 import { authenticatedUser } from '../guards/auth.guard';
 import { TaskService } from '../services/task.service';
 import { userRoleGuard } from '../guards/user-role.guard';
-import { initialRoles } from '../initialUserData';
+import { initialRoles } from '../assets/initialUserData';
 import { AuthenticatedUser, UserData, UserModel } from '../models/user.model';
 import { UserService } from '../services/user.service';
 

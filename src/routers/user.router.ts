@@ -3,7 +3,7 @@ import { UserService } from '../services/user.service';
 import { AuthenticatedUser, UserData } from '../models/user.model';
 import { authenticatedUser } from '../guards/auth.guard';
 import { userRoleGuard } from '../guards/user-role.guard';
-import { initialRoles } from '../initialUserData';
+import { initialRoles } from '../assets/initialUserData';
 
 const userRouter = Router();
 const userService = new UserService();

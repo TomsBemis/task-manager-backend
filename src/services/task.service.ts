@@ -1,4 +1,4 @@
-import { initialTaskTypes, initialTaskStatuses, initialTasks } from "../initialTaskData";
+import { initialTaskTypes, initialTaskStatuses, initialTasks } from "../assets/initialTaskData";
 import { Option, TaskStatusModel, TaskTypeModel } from "../models/option.model";
 import { TaskModel, Task, BasicTask } from "../models/task.model";
 import { User, UserModel } from "../models/user.model";

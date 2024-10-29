@@ -1,0 +1,54 @@
+{
+    "appName": "Uzdevumu pārvaldītājs",
+    "task": {
+        "list" : "Uzdevumu saraksts",
+        "createTask" : "Izveidot jaunu uzdevumu",
+        "deleteTask" : "Izdzēst",
+        "editTask" : "Labot",
+        "saveTask" : "Saglabāt",
+        "assignedTo" : "Deleģēts",
+        "unassigned" : "Nav deleģēts",
+        "createdOn" : "Izveidots",
+        "modifiedOn" : "Pēdējo reizi labots",
+        "title" : "Uzdevuma nosaukums",
+        "description" : "Uzdevuma apraksts",
+        "taskType" : "Uzdevuma veids",
+        "taskStatus" : "Uzdevuma statuss",
+        "assignedUser" : "Deleģētais lietotājs",
+        "typeRequired" : "Uzdevuma veids ir nepieciešams",
+        "titleRequired" : "Uzdevuma nosaukums ir nepieciešams",
+        "statusRequired" : "Uzdevuma statuss ir nepieciešams",
+        "titleExists" : "Uzdevuma nosaukums jau pastāv",
+        "type" : {
+            "subtask": "Apakšuzdevums",
+            "story": "Stāsts",
+            "task": "Uzdevums"
+        },
+        "status" : {
+            "fixInDev": "Izlabot izstrādē",
+            "obsolete": "Novecojis",
+            "inProgress": "Procesā",
+            "done": "Pabeigts"
+        }
+    },
+    "user": {
+        "username": "Lietotājvārds",
+        "password": "Parole",
+        "retypePassword": "Atkārtoti ievadiet paroli",
+        "firstName": "Vārds",
+        "lastName": "Uzvārds",
+        "roles": "Lomas",
+        "editUser": "Labot lietotāju",
+        "saveUser": "Saglabāt lietotāju",
+        "welcome": "Laipni lūdzam",
+        "login": "Ielogoties",
+        "logout": "Izlogoties",
+        "register": "Reģistrēties",
+        "userList": "Lietotāju saraksts",
+        "role": {
+            "admin": "Administrators",
+            "manager": "Vadītājs",
+            "regularUser": "Parastais lietotājs"
+        }
+    }
+}
