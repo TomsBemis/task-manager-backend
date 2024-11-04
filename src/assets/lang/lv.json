@@ -48,7 +48,7 @@
         "role": {
             "admin": "Administrators",
             "manager": "Vadītājs",
-            "regularUser": "Parastais lietotājs"
+            "user": "Parastais lietotājs"
         }
     }
 }

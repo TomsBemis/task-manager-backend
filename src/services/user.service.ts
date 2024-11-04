@@ -1,7 +1,6 @@
 import { ObjectId } from "mongodb";
-import { initialRoles, initialUsers } from "../assets/initialUserData";
-import { Option, RoleModel } from "../models/option.model";
-import { UserData, UserModel, UserRole } from "../models/user.model";
+import { initialUsers } from "../assets/initialUserData";
+import { Role, UserData, UserModel, UserRole } from "../models/user.model";
 
 const bcrypt = require('bcrypt');
 
@@ -9,14 +8,6 @@ export class UserService {
 
     static async initializeUsers(): Promise<void> {
             
-        // Delete all roles from DB and initialize roles
-        await RoleModel.deleteMany({}).then(async result => {
-            let roleValues: Option[] = [];
-            for (let key in initialRoles) roleValues.push(initialRoles[key])
-            await RoleModel.create(roleValues);
-            roleValues = await RoleModel.find();
-        })
-
         // Delete all users from DB and initialize users
         await UserModel.deleteMany({}).then(async () => {
 
@@ -73,14 +64,14 @@ export class UserService {
 
         // Validate that new roles can be assigned
         let managerRole: UserRole[] = updatedRoles.filter(updatedRole => {
-            return updatedRole.role.value === "MANAGER";
+            return updatedRole.role === Role.manager;
         });
 
         if(managerRole == null) throw Error("Only manager role can be updated");
 
         await UserModel.updateOne(
             { _id: userId },
-            { $set: {roles: managerRole[0].enabled ? "MANAGER" : "USER"} }
+            { $set: {roles: managerRole[0].enabled ? Role.manager : Role.user} }
         )
 
         return UserService.convertToUserData(await UserModel.findOne({ _id: userId }));
@@ -88,7 +79,6 @@ export class UserService {
 
     // Method for converting full user object into a object with only the basic information
     public static convertToUserData(user: any) : UserData {   // Setting parameter type to User doesn't allow fetching hidden field '_id'
-    
         return {
             id: user._id,
             firstName: user.firstName,

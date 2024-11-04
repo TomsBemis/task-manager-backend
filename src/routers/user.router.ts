@@ -1,9 +1,8 @@
 import { json, Router } from 'express';
 import { UserService } from '../services/user.service';
-import { AuthenticatedUser, UserData } from '../models/user.model';
+import { AuthenticatedUser, Role, UserData } from '../models/user.model';
 import { authenticatedUser } from '../guards/auth.guard';
 import { userRoleGuard } from '../guards/user-role.guard';
-import { initialRoles } from '../assets/initialUserData';
 
 const userRouter = Router();
 const userService = new UserService();
@@ -11,8 +10,8 @@ const userService = new UserService();
 userRouter.use(json());
 userRouter.use(authenticatedUser);
 
-userRouter.get(["/"], userRoleGuard([initialRoles['ADMIN']], true));
-userRouter.post(["/:userId"], userRoleGuard([initialRoles['ADMIN']], true));
+userRouter.get(["/"], userRoleGuard([Role.admin], true));
+userRouter.post(["/:userId"], userRoleGuard([Role.admin], true));
 
 userRouter.get("/", async (request, response) => {
     try {
@@ -31,7 +30,7 @@ userRouter.get("/", async (request, response) => {
 userRouter.get("/:userId", async (request, response) => {
     
     const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
-    if(!authenticatedUser.user.roles.includes("ADMIN")) {
+    if(!authenticatedUser.user.roles.includes(Role.admin)) {
         if(request.params.userId !== authenticatedUser.userId) {
             response.status(401);
             response.json({ error: "Only users with administrator priviledges or users owners have access." });
@@ -68,7 +67,7 @@ userRouter.post("/:userId", async (request, response) => {
     try {
 
         const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
-        if(!authenticatedUser.user.roles.includes("ADMIN")) {
+        if(!authenticatedUser.user.roles.includes(Role.admin)) {
             response.status(401);
             response.json({ error: "Only users with administrator priviledges have access." });
             return;
