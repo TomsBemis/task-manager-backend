@@ -4,16 +4,3 @@ export const initialTasks = [
     {"title" : "TM-4", "description" : "Task List Application - Create base", "type" : "subtask", "status": "fixInDev", "assignedUser": null},
     {"title" : "TM-5", "description" : "Create a “Create task“ component with add a task functionality using Angular Reactive Forms.", "type" : "subtask", "status": "inProgress", "assignedUser": "66ed41d27822146baf0336af"}
 ];
-
-export const initialTaskTypes = [
-    {"value" : "story", "displayName" : "Story"},
-    {"value" : "task", "displayName" : "Task"},
-    {"value" : "subtask", "displayName" : "Subtask"}
-];
-
-export const initialTaskStatuses = [
-    {"value" : "inProgress", "displayName" : "In Progress"},
-    {"value" : "fixInDev", "displayName" : "Fix in dev"},
-    {"value" : "obsolete", "displayName" : "Obsolete"},
-    {"value" : "done", "displayName" : "Done"}
-];

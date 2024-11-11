@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { Option } from '../models/option.model';
-import { AuthenticatedUser } from "../models/user.model";
+import { AuthenticatedUser, Role } from "../models/user.model";
 
 // Route guard for whitelisting or blacklisting users with specified roles
-export const userRoleGuard = (criteriaRoles: Option[], whitelist: boolean) => {
+export const userRoleGuard = (criteriaRoles: Role[], whitelist: boolean) => {
     return (request: Request, response: Response, next: NextFunction) => {
 
         // Fetch user that was appended to the request by auth guard
@@ -18,7 +17,7 @@ export const userRoleGuard = (criteriaRoles: Option[], whitelist: boolean) => {
         let matchingRoleFound: boolean = false;
 
         criteriaRoles.forEach(criteriaRole => {
-            if(authenticatedUser.user.roles.includes(criteriaRole.value)) matchingRoleFound = true;
+            if(authenticatedUser.user.roles.includes(criteriaRole)) matchingRoleFound = true;
         });
 
         // If role is whitelisted and found in user's roles then allow access
@@ -31,7 +30,7 @@ export const userRoleGuard = (criteriaRoles: Option[], whitelist: boolean) => {
             response.status(401);
             response.json({ error: 
                 "Only users with roles "+
-                criteriaRoles.map(criteriaRole => "'"+criteriaRole.displayName+"'").join(", ")+
+                criteriaRoles.join(", ")+
                 " are allowed to access this route"
             });
             return;

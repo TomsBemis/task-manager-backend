@@ -1,5 +1,10 @@
 import {Schema, model} from 'mongoose';
-import { Option } from './option.model';
+
+export enum Role {
+    USER = "user",
+    MANAGER = "manager",
+    ADMIN = "admin"
+}
 
 // User model
 
@@ -57,6 +62,6 @@ export interface AuthenticatedUser {
 }
 
 export interface UserRole {
-    role: Option, 
+    role: Role, 
     enabled: boolean
 }

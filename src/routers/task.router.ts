@@ -2,8 +2,7 @@ import { json, Router } from 'express';
 import { authenticatedUser } from '../guards/auth.guard';
 import { TaskService } from '../services/task.service';
 import { userRoleGuard } from '../guards/user-role.guard';
-import { initialRoles } from '../assets/initialUserData';
-import { AuthenticatedUser, UserData, UserModel } from '../models/user.model';
+import { AuthenticatedUser, Role, UserData, UserModel } from '../models/user.model';
 import { UserService } from '../services/user.service';
 
 const taskRouter = Router();
@@ -12,17 +11,11 @@ const taskService = new TaskService();
 taskRouter.use(json());
 taskRouter.use(authenticatedUser);
 
-taskRouter.get(["/", "/essential-task-data", "/:taskId"], userRoleGuard([initialRoles['USER']], true));
-taskRouter.get(["/initialize"], userRoleGuard([initialRoles['ADMIN']], true));
-taskRouter.post(["/"], userRoleGuard([initialRoles['ADMIN']], true));
-taskRouter.delete(["/:taskId"], userRoleGuard([initialRoles['ADMIN']], true));
-taskRouter.patch(["/:taskId"], userRoleGuard([initialRoles['ADMIN'], initialRoles['MANAGER']], true));
-
-taskRouter.get("/essential-task-data", async (request, response) => {
- 
-    response.send(await taskService.getEssentialTaskData());
-
-});
+taskRouter.get(["/", "/essential-task-data", "/:taskId"], userRoleGuard([Role.USER], true));
+taskRouter.get(["/initialize"], userRoleGuard([Role.ADMIN], true));
+taskRouter.post(["/"], userRoleGuard([Role.ADMIN], true));
+taskRouter.delete(["/:taskId"], userRoleGuard([Role.ADMIN], true));
+taskRouter.patch(["/:taskId"], userRoleGuard([Role.ADMIN, Role.MANAGER], true));
 
 taskRouter.get("/", async (request, response) => {
  
@@ -36,9 +29,9 @@ taskRouter.get("/:taskId", async (request, response) => {
     
     // If authenticated user is a manager, add assignable users to response
     const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
-    if(authenticatedUser.user.roles.includes("MANAGER")) {
+    if(authenticatedUser.user.roles.includes(Role.MANAGER)) {
         const assignableUsers: UserData[] = [];
-            (await UserModel.find({roles: "USER"})).forEach(user => {
+            (await UserModel.find({roles: Role.USER})).forEach(user => {
             assignableUsers.push(UserService.convertToUserData(user))
         });
 
