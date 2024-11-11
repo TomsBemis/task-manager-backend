@@ -67,11 +67,11 @@ export class TaskService {
 
     public async validateTaskData(currentUser: User, taskId: string, taskData: any) {
 
-        if(!currentUser.roles.includes(Role.admin) && !currentUser.roles.includes(Role.manager)) {
+        if(!currentUser.roles.includes(Role.ADMIN) && !currentUser.roles.includes(Role.MANAGER)) {
             throw Error("Only users with the roles admin or manager can update a task");
         }
 
-        if(currentUser.roles.includes(Role.admin)) {
+        if(currentUser.roles.includes(Role.ADMIN)) {
             // Remove only assigned user from task data
             delete taskData.assignedUser;
 
@@ -84,7 +84,7 @@ export class TaskService {
             }
             
         }
-        else if(currentUser.roles.includes(Role.manager)) {
+        else if(currentUser.roles.includes(Role.MANAGER)) {
             // Remove all task data except assigned user
             let fetchedUser: any = null;
             if(taskData.assignedUser) {

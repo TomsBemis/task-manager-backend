@@ -10,8 +10,8 @@ const userService = new UserService();
 userRouter.use(json());
 userRouter.use(authenticatedUser);
 
-userRouter.get(["/"], userRoleGuard([Role.admin], true));
-userRouter.post(["/:userId"], userRoleGuard([Role.admin], true));
+userRouter.get(["/"], userRoleGuard([Role.ADMIN], true));
+userRouter.post(["/:userId"], userRoleGuard([Role.ADMIN], true));
 
 userRouter.get("/", async (request, response) => {
     try {
@@ -30,7 +30,7 @@ userRouter.get("/", async (request, response) => {
 userRouter.get("/:userId", async (request, response) => {
     
     const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
-    if(!authenticatedUser.user.roles.includes(Role.admin)) {
+    if(!authenticatedUser.user.roles.includes(Role.ADMIN)) {
         if(request.params.userId !== authenticatedUser.userId) {
             response.status(401);
             response.json({ error: "Only users with administrator priviledges or users owners have access." });
@@ -67,7 +67,7 @@ userRouter.post("/:userId", async (request, response) => {
     try {
 
         const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
-        if(!authenticatedUser.user.roles.includes(Role.admin)) {
+        if(!authenticatedUser.user.roles.includes(Role.ADMIN)) {
             response.status(401);
             response.json({ error: "Only users with administrator priviledges have access." });
             return;

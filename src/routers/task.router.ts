@@ -11,11 +11,11 @@ const taskService = new TaskService();
 taskRouter.use(json());
 taskRouter.use(authenticatedUser);
 
-taskRouter.get(["/", "/essential-task-data", "/:taskId"], userRoleGuard([Role.user], true));
-taskRouter.get(["/initialize"], userRoleGuard([Role.admin], true));
-taskRouter.post(["/"], userRoleGuard([Role.admin], true));
-taskRouter.delete(["/:taskId"], userRoleGuard([Role.admin], true));
-taskRouter.patch(["/:taskId"], userRoleGuard([Role.admin, Role.manager], true));
+taskRouter.get(["/", "/essential-task-data", "/:taskId"], userRoleGuard([Role.USER], true));
+taskRouter.get(["/initialize"], userRoleGuard([Role.ADMIN], true));
+taskRouter.post(["/"], userRoleGuard([Role.ADMIN], true));
+taskRouter.delete(["/:taskId"], userRoleGuard([Role.ADMIN], true));
+taskRouter.patch(["/:taskId"], userRoleGuard([Role.ADMIN, Role.MANAGER], true));
 
 taskRouter.get("/", async (request, response) => {
  
@@ -29,9 +29,9 @@ taskRouter.get("/:taskId", async (request, response) => {
     
     // If authenticated user is a manager, add assignable users to response
     const authenticatedUser: AuthenticatedUser = request.body['authenticatedUser'];
-    if(authenticatedUser.user.roles.includes(Role.manager)) {
+    if(authenticatedUser.user.roles.includes(Role.MANAGER)) {
         const assignableUsers: UserData[] = [];
-            (await UserModel.find({roles: Role.user})).forEach(user => {
+            (await UserModel.find({roles: Role.USER})).forEach(user => {
             assignableUsers.push(UserService.convertToUserData(user))
         });
 

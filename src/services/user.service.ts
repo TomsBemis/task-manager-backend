@@ -64,14 +64,14 @@ export class UserService {
 
         // Validate that new roles can be assigned
         let managerRole: UserRole[] = updatedRoles.filter(updatedRole => {
-            return updatedRole.role === Role.manager;
+            return updatedRole.role === Role.MANAGER;
         });
 
         if(managerRole == null) throw Error("Only manager role can be updated");
 
         await UserModel.updateOne(
             { _id: userId },
-            { $set: {roles: managerRole[0].enabled ? Role.manager : Role.user} }
+            { $set: {roles: managerRole[0].enabled ? Role.MANAGER : Role.USER} }
         )
 
         return UserService.convertToUserData(await UserModel.findOne({ _id: userId }));
