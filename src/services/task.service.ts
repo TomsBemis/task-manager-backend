@@ -1,5 +1,4 @@
-import { initialTaskTypes, initialTaskStatuses, initialTasks } from "../assets/initialTaskData";
-import { Option, TaskStatusModel, TaskTypeModel } from "../models/option.model";
+import { initialTasks } from "../assets/initialTaskData";
 import { TaskModel, Task, BasicTask } from "../models/task.model";
 import { User, UserModel } from "../models/user.model";
 import { UserService } from "./user.service";
@@ -10,16 +9,6 @@ export class TaskService {
 
         // Delete tasks, their types and statuses before initializing
         await TaskModel.deleteMany({});
-        await TaskTypeModel.deleteMany({});
-        await TaskStatusModel.deleteMany({});
-            
-        // Initialize task types
-        await TaskTypeModel.create(initialTaskTypes);
-        let taskTypes = await TaskTypeModel.find();
-
-        // Initialize task statuses
-        await TaskStatusModel.create(initialTaskStatuses);
-        let taskStatuses = await TaskStatusModel.find();
 
         let tasks : Task[] = [];
 
@@ -38,28 +27,13 @@ export class TaskService {
             tasks.push({
                 title: initialTask.title,
                 description: initialTask.description,
-                type: taskTypes.find( taskType => 
-                    taskType.value == initialTask.type
-                ) as Option,
-                status: taskStatuses.find( taskStatus => 
-                    taskStatus.value == initialTask.status
-                ) as Option,
+                type: initialTask.type,
+                status: initialTask.status,
                 assignedUser: taskUser
             });
         });
 
         await TaskModel.create(tasks);
-    }
-
-    public async getEssentialTaskData() {
-        const taskStatuses = await TaskStatusModel.find();  
-        const taskTypes = await TaskTypeModel.find();  
-        const tasks = await TaskModel.find();    
-        return {
-            'taskStatuses' : taskStatuses,
-            'taskTypes' : taskTypes,
-            'tasks' : tasks.map(task => TaskService.toBasicTask(task))
-        };
     }
 
     public async getTasks(): Promise<BasicTask[]> {        
@@ -135,10 +109,7 @@ export class TaskService {
         return {
             id: task.id,
             title: task.title, 
-            type: {
-                value: task.type.value,
-                displayName: task.type.displayName
-            }
+            type: task.type
         }
     }
 }

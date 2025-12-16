@@ -46,9 +46,9 @@
         "register": "Reģistrēties",
         "userList": "Lietotāju saraksts",
         "role": {
-            "admin": "Administrators",
-            "manager": "Vadītājs",
-            "regularUser": "Parastais lietotājs"
+            "ADMIN": "Administrators",
+            "MANAGER": "Vadītājs",
+            "REGULAR_USER": "Parastais lietotājs"
         }
     }
 }

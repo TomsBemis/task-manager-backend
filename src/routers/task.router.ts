@@ -12,17 +12,11 @@ const taskService = new TaskService();
 taskRouter.use(json());
 taskRouter.use(authenticatedUser);
 
-taskRouter.get(["/", "/essential-task-data", "/:taskId"], userRoleGuard([initialRoles['USER']], true));
+taskRouter.get(["/", "/essential-task-data", "/:taskId"], userRoleGuard([initialRoles['REGULAR_USER']], true));
 taskRouter.get(["/initialize"], userRoleGuard([initialRoles['ADMIN']], true));
 taskRouter.post(["/"], userRoleGuard([initialRoles['ADMIN']], true));
 taskRouter.delete(["/:taskId"], userRoleGuard([initialRoles['ADMIN']], true));
 taskRouter.patch(["/:taskId"], userRoleGuard([initialRoles['ADMIN'], initialRoles['MANAGER']], true));
-
-taskRouter.get("/essential-task-data", async (request, response) => {
- 
-    response.send(await taskService.getEssentialTaskData());
-
-});
 
 taskRouter.get("/", async (request, response) => {
  

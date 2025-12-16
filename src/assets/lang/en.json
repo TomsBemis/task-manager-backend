@@ -46,9 +46,9 @@
         "register": "Register",
         "userList": "User list",
         "role": {
-            "admin": "Administrator",
-            "manager": "Manager",
-            "regularUser": "Regular User"
+            "ADMIN": "Administrator",
+            "MANAGER": "Manager",
+            "REGULAR_USER": "Regular User"
         }
     }
 }

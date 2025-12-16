@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { initialRoles, initialUsers } from "../assets/initialUserData";
-import { Option, RoleModel } from "../models/option.model";
-import { UserData, UserModel, UserRole } from "../models/user.model";
+import { UserData, UserModel } from "../models/user.model";
+import { Role, RoleModel } from "../models/role.model";
 
 const bcrypt = require('bcrypt');
 
@@ -11,11 +11,12 @@ export class UserService {
             
         // Delete all roles from DB and initialize roles
         await RoleModel.deleteMany({}).then(async result => {
-            let roleValues: Option[] = [];
-            for (let key in initialRoles) roleValues.push(initialRoles[key])
-            await RoleModel.create(roleValues);
-            roleValues = await RoleModel.find();
-        })
+            let roles: Role[] = [];
+            for (let key in initialRoles) roles.push(initialRoles[key])
+            await RoleModel.create(roles);
+            roles = await RoleModel.find();
+
+        });
 
         // Delete all users from DB and initialize users
         await UserModel.deleteMany({}).then(async () => {
@@ -65,22 +66,22 @@ export class UserService {
         return UserService.convertToUserData(user);
     }
 
-    public async updateRoles(userId: string, updatedRoles: UserRole[]): Promise<UserData | null> {
+    public async updateRoles(userId: string, updatedRoles: Role[]): Promise<UserData | null> {
 
         // Check if user exists by id
         const userById: any = await UserModel.findOne({ _id: userId });
         if(!userById) return null;
 
         // Validate that new roles can be assigned
-        let managerRole: UserRole[] = updatedRoles.filter(updatedRole => {
-            return updatedRole.role.value === "MANAGER";
+        let managerRole: Role[] = updatedRoles.filter(updatedRole => {
+            return updatedRole.name === "MANAGER";
         });
 
         if(managerRole == null) throw Error("Only manager role can be updated");
 
         await UserModel.updateOne(
             { _id: userId },
-            { $set: {roles: managerRole[0].enabled ? "MANAGER" : "USER"} }
+            { $set: {roles: updatedRoles} }
         )
 
         return UserService.convertToUserData(await UserModel.findOne({ _id: userId }));

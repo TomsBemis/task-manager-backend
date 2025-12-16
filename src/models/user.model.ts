@@ -1,5 +1,4 @@
 import {Schema, model} from 'mongoose';
-import { Option } from './option.model';
 
 // User model
 
@@ -54,9 +53,4 @@ export interface AuthCredentials {
 export interface AuthenticatedUser {
     userId: string,
     user: User
-}
-
-export interface UserRole {
-    role: Option, 
-    enabled: boolean
 }
